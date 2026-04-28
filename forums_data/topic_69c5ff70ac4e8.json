@@ -1,0 +1,26 @@
+[
+    {
+        "message": "test",
+        "created_at": 1774585034,
+        "created_by": "Rahma Ayu Ananda"
+    },
+    {
+        "message": "ping",
+        "username": "2255301152",
+        "fullname": "Rahma Ayu Ananda",
+        "avatar_url": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg",
+        "created_at": 1774585848
+    },
+    {
+        "message": "test",
+        "created_at": 1774600057,
+        "created_by": "Rahma Ayu Ananda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg"
+    },
+    {
+        "message": "hallo",
+        "created_at": 1774603222,
+        "created_by": "aynda",
+        "avatar": "https:\/\/ui-avatars.com\/api\/?name=aynda"
+    }
+]

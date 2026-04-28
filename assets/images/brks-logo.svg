@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="240" height="240">
+  <rect width="120" height="120" fill="none"/>
+  <!-- orange sail -->
+  <path d="M78 8 L106 64 L62 64 Z" fill="#f39c12"/>
+  <!-- green stripe -->
+  <rect x="8" y="54" width="104" height="10" rx="5" fill="#2ca348" />
+  <!-- red base (rounded) -->
+  <path d="M16 64 Q60 110 104 64 L104 86 Q84 106 60 106 Q36 106 16 86 Z" fill="#b81f22"/>
+</svg>

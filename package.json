@@ -1,0 +1,12 @@
+{
+  "name": "brk-forum-ws",
+  "version": "1.0.0",
+  "description": "WebSocket notification server for BRK forum (dev)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.13.0"
+  }
+}
