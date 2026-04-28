@@ -88,7 +88,24 @@ class Auth extends CI_Controller
                         'role' => $row['role'], // ✅ TAMBAHAN PENTING
                         'logged_in' => true
                     ]);
-                    
+
+                    // 🔥 SIMPAN NOTIF KE FILE (GLOBAL)
+                    $this->save_notification([
+                        'type' => 'user_login',
+                        'topic_id' => 'login', // 🔥 TAMBAHAN
+                        'topic_title' => 'Login System',
+                        'created_by' => $fullname,
+                        'created_at' => time()
+                    ]);
+
+                    // 🔥 KIRIM NOTIF LOGIN
+                    $this->notify_ws('user_login', [
+                        'topic_id' => 'login', // 🔥 WAJIB
+                        'topic_title' => 'Login System',
+                        'user' => $fullname,
+                        'created_at' => time()
+                    ]);
+
                     // welcome message
                     $this->session->set_flashdata('welcome', 'Selamat Datang ' . $fullname);
 
@@ -553,6 +570,31 @@ class Auth extends CI_Controller
         }
 
         $this->output->set_content_type('application/json')->set_output(json_encode(['success' => false, 'message' => 'Gagal memperbarui profil']));
+    }
+
+    protected function notify_ws($type, $data)
+    {
+        $ws_host = '127.0.0.1';
+        $ws_port = '8080';
+        $url = 'http://' . $ws_host . ':' . $ws_port . '/notify?type=' . rawurlencode($type) . '&data=' . rawurlencode(json_encode($data, JSON_UNESCAPED_UNICODE));
+
+        $opts = ['http' => ['method' => 'GET', 'timeout' => 0.5]];
+        $context = stream_context_create($opts);
+
+        @file_get_contents($url, false, $context);
+    }
+    private function save_notification($notif)
+    {
+        $file = FCPATH . 'data/notifications.json';
+
+        if (!file_exists($file)) {
+            file_put_contents($file, json_encode([]));
+        }
+
+        $data = json_decode(file_get_contents($file), true);
+        $data[] = $notif;
+
+        file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT));
     }
 
 }

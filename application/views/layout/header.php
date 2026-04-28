@@ -143,7 +143,29 @@ $subtitle = isset($subtitle) ? $subtitle : '';
                 html += (isUnread
                     ? '<span class="unread-dot" style="display:inline-block;width:8px;height:8px;background:#0d6efd;border-radius:999px;margin-right:8px;vertical-align:middle"></span>'
                     : '');
-                html += escapeHtml(actor) + ' sent a message';
+                let text = '';
+
+                if (n.type === 'topic_created') {
+                    text = actor + ' membuat topic baru';
+                }
+                else if (n.type === 'topic_deleted') {
+                    text = actor + ' menghapus topic';
+                }
+                else if (n.type === 'user_login') {
+                    text = actor + ' melakukan login';
+                }
+                else {
+                    // 🔥 DEFAULT = NOTIF LAMA (JANGAN DIUBAH)
+                    text = actor + ' sent a message';
+                }
+
+                html += escapeHtml(text);
+
+                let link = '#';
+
+                if (n.type === 'message' || !n.type) {
+                    link = '<?php echo site_url('forum/topic/'); ?>' + encodeURIComponent(n.topic_id);
+                }
                 html += '</div>';
 
                 //menampilkan nama topik
@@ -249,6 +271,7 @@ $subtitle = isset($subtitle) ? $subtitle : '';
         }
 
         function addNotification(n) {
+            console.log("ADD NOTIF:", n); // 🔥 debug
             if (!n) return;
             window.__NOTIFS = window.__NOTIFS || [];
             // avoid duplicates by created_at + topic
@@ -277,7 +300,7 @@ $subtitle = isset($subtitle) ? $subtitle : '';
                 var msg = payload.message || payload;
                 if (!topic_id) return;
                 if (!__LOGGED_IN) return;
-                if (!window.__USER_JOINED_TOPICS || !window.__USER_JOINED_TOPICS.has(String(topic_id))) return;
+                // if (!window.__USER_JOINED_TOPICS || !window.__USER_JOINED_TOPICS.has(String(topic_id))) return;
                 if (msg.created_by && String(msg.created_by) === String(__FULLNAME)) return;
                 addNotification({ topic_id: topic_id, topic_title: (payload.topic_title || ''), message: msg.message || '', created_at: msg.created_at || Math.floor(Date.now() / 1000), created_by: msg.created_by || '', avatar: msg.avatar || null });
             } catch (e) { }
@@ -288,14 +311,72 @@ $subtitle = isset($subtitle) ? $subtitle : '';
             window.__NOTIF_WS_INITED = true;
             try {
                 var ws = new WebSocket(wsUrl);
-                ws.addEventListener('open', function () { console.log('WS connected (notif)'); });
+
+                ws.addEventListener('open', function () {
+                    console.log('WS connected (notif)');
+                });
+
+
                 ws.addEventListener('message', function (ev) {
+                    console.log("RAW WS:", ev.data);
                     try {
                         var d = JSON.parse(ev.data);
-                        if (d.type === 'topic') { if (typeof refreshTopics === 'function') refreshTopics(); }
-                        else if (d.type === 'message') handleIncomingWsMessage(d);
-                    } catch (e) { }
+
+                        // 🔥 TAMBAHKAN DI SINI
+                        console.log("WS DATA:", d);
+                        console.log("NOTIFS:", window.__NOTIFS);
+
+                        if (d.type === 'topic') {
+                            if (typeof refreshTopics === 'function') refreshTopics();
+                        }
+
+                        // notif message lama
+                        else if (d.type === 'message') {
+                            handleIncomingWsMessage(d);
+                        }
+
+                        // topic baru
+                        else if (d.type === 'topic_created') {
+                            addNotification({
+                                type: 'topic_created',
+                                topic_id: d.data.topic_id,
+                                topic_title: d.data.topic_title,
+                                created_by: d.data.created_by,
+                                created_at: d.data.created_at
+                            });
+                        }
+
+                        // hapus topic
+                        else if (d.type === 'topic_deleted') {
+                            addNotification({
+                                type: 'topic_deleted',
+                                topic_id: d.data.topic_id,
+                                topic_title: d.data.topic_title,
+                                created_by: d.data.deleted_by,
+                                created_at: d.data.created_at
+                            });
+                        }
+
+                        // login user
+                        else if (d.type === 'user_login') {
+                            addNotification({
+                                type: 'user_login',
+                                topic_id: 'login', // 🔥 penting
+                                topic_title: 'Login System',
+                                created_by: d.data.user,
+                                created_at: d.data.created_at
+                            });
+                        }
+
+                    } catch (e) {
+                        console.error('WS parse error:', e);
+                    }
                 });
+
+                ws.addEventListener('close', function () {
+                    console.log('WS closed (notif)');
+                });
+
                 ws.addEventListener('close', function () { console.log('WS closed (notif)'); });
             } catch (e) { }
         }
