@@ -24,6 +24,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 */
 $config['base_url'] = 'http://localhost/brk-project/';
+// $config['base_url'] = 'http://10.248.64.98/brk-project/';
 
 /*
 |--------------------------------------------------------------------------

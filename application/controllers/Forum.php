@@ -282,47 +282,6 @@ class Forum extends CI_Controller
         $context = stream_context_create($opts);
         @file_get_contents($url, false, $context);
     }
-    // public function delete_topic($id = null)
-    // {
-    //     if ($this->input->server('REQUEST_METHOD') !== 'POST') {
-    //         $this->output->set_status_header(405)->set_content_type('application/json')->set_output(json_encode(['error' => 'Method not allowed']));
-    //         return;
-    //     }
-
-    //     if (!$id) {
-    //         $this->output->set_status_header(400)->set_content_type('application/json')->set_output(json_encode(['error' => 'Missing id']));
-    //         return;
-    //     }
-
-    //     $topic = $this->forum_model->find_topic($id);
-    //     if (!$topic) {
-    //         $this->output->set_status_header(404)->set_content_type('application/json')->set_output(json_encode(['error' => 'Topic not found']));
-    //         return;
-    //     }
-
-    //     $username = $this->session->userdata('nip') ?: null;
-    //     $fullname = $this->session->userdata('nama_lengkap') ?: null;
-
-    //     $is_owner = false;
-    //     if ($username && $username === ($topic['created_by'] ?? ''))
-    //         $is_owner = true;
-    //     if ($fullname && $fullname === ($topic['created_by'] ?? ''))
-    //         $is_owner = true;
-
-    //     if (!$is_owner) {
-    //         $this->output->set_status_header(403)->set_content_type('application/json')->set_output(json_encode(['error' => 'Not allowed']));
-    //         return;
-    //     }
-
-    //     $deleted = $this->forum_model->delete_topic($id);
-    //     if (!$deleted) {
-    //         $this->output->set_status_header(500)->set_content_type('application/json')->set_output(json_encode(['error' => 'Gagal menghapus topik']));
-    //         return;
-    //     }
-
-    //     $this->notify_ws('topic_deleted', ['topic_id' => $id]);
-    //     $this->output->set_content_type('application/json')->set_output(json_encode(['success' => true]));
-    // }
 
     public function delete_topic($id = null)
     {
@@ -379,19 +338,6 @@ class Forum extends CI_Controller
             ->set_output(json_encode(['success' => true]));
     }
 
-    // public function delete_message()
-    // {
-    //     $id = $this->input->post('id');
-
-    //     if (!$id) {
-    //         echo json_encode(['success' => false]);
-    //         return;
-    //     }
-
-    //     $deleted = $this->forum_model->delete_message_by_id($id);
-
-    //     echo json_encode(['success' => $deleted]);
-    // }
 
     public function delete_message()
     {

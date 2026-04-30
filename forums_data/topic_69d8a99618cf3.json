@@ -12,5 +12,26 @@
         "created_at": 1776151107,
         "created_by": "Rahma Ayu Ananda",
         "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg"
+    },
+    {
+        "id": "69f1763ec7068",
+        "message": "p",
+        "created_at": 1777432126,
+        "created_by": "aynda",
+        "avatar": "http:\/\/10.248.64.98\/brk-project\/assets\/avatars\/2255301153.png"
+    },
+    {
+        "id": "69f1765a9928a",
+        "message": "hallo",
+        "created_at": 1777432154,
+        "created_by": "Rahma Ayu Ananda",
+        "avatar": "http:\/\/10.248.64.98\/brk-project\/assets\/avatars\/2255301152.jpg"
+    },
+    {
+        "id": "69f1775ab8c68",
+        "message": "ping",
+        "created_at": 1777432410,
+        "created_by": "aynda",
+        "avatar": "http:\/\/10.248.64.98\/brk-project\/assets\/avatars\/2255301153.png"
     }
 ]
