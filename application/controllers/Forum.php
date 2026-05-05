@@ -159,29 +159,29 @@ class Forum extends CI_Controller
             ->set_output(json_encode($entry));
     }
 
-    public function join_topic()
-    {
-        if ($this->input->server('REQUEST_METHOD') !== 'POST') {
-            $this->output->set_status_header(405)->set_content_type('application/json')->set_output(json_encode(['error' => 'Method not allowed']));
-            return;
-        }
+    // public function join_topic()
+    // {
+    //     if ($this->input->server('REQUEST_METHOD') !== 'POST') {
+    //         $this->output->set_status_header(405)->set_content_type('application/json')->set_output(json_encode(['error' => 'Method not allowed']));
+    //         return;
+    //     }
 
-        if (!$this->session->userdata('logged_in')) {
-            $this->output->set_status_header(403)->set_content_type('application/json')->set_output(json_encode(['error' => 'Not logged in']));
-            return;
-        }
+    //     if (!$this->session->userdata('logged_in')) {
+    //         $this->output->set_status_header(403)->set_content_type('application/json')->set_output(json_encode(['error' => 'Not logged in']));
+    //         return;
+    //     }
 
-        $topic_id = $this->input->post('topic_id', true);
-        if (!$topic_id) {
-            $this->output->set_status_header(400)->set_content_type('application/json')->set_output(json_encode(['error' => 'Missing topic_id']));
-            return;
-        }
+    //     $topic_id = $this->input->post('topic_id', true);
+    //     if (!$topic_id) {
+    //         $this->output->set_status_header(400)->set_content_type('application/json')->set_output(json_encode(['error' => 'Missing topic_id']));
+    //         return;
+    //     }
 
-        $username = $this->session->userdata('nip');
-        $saved = $this->forum_model->join_topic($username, $topic_id);
+    //     $username = $this->session->userdata('nip');
+    //     $saved = $this->forum_model->join_topic($username, $topic_id);
 
-        $this->output->set_content_type('application/json')->set_output(json_encode(['success' => (bool) $saved]));
-    }
+    //     $this->output->set_content_type('application/json')->set_output(json_encode(['success' => (bool) $saved]));
+    // }
 
     public function my_topics()
     {
@@ -195,10 +195,11 @@ class Forum extends CI_Controller
             redirect('forum'); // atau dashboard admin
             return;
         }
-        
-        $username = $this->session->userdata('nip');
-        // $topics = $this->forum_model->get_user_topics($username);
-        $topics = $this->forum_model->get_user_topics_with_count($username);
+
+        $username = $this->session->userdata('nama_lengkap')
+            ?: $this->session->userdata('nip');
+
+        $topics = $this->forum_model->get_topics_by_creator($username);
 
         $data['topics'] = $topics;
 
@@ -206,33 +207,33 @@ class Forum extends CI_Controller
     }
 
     // API: return joined topics for current user (JSON)
-    public function user_topics()
-    {
-        if (!$this->session->userdata('logged_in')) {
-            $this->output->set_status_header(403)
-                ->set_content_type('application/json')
-                ->set_output(json_encode([]));
-            return;
-        }
+    // public function user_topics()
+    // {
+    //     if (!$this->session->userdata('logged_in')) {
+    //         $this->output->set_status_header(403)
+    //             ->set_content_type('application/json')
+    //             ->set_output(json_encode([]));
+    //         return;
+    //     }
 
-        $username = $this->session->userdata('nip');
-        $topics = $this->forum_model->get_user_topics($username);
+    //     $username = $this->session->userdata('nip');
+    //     $topics = $this->forum_model->get_user_topics($username);
 
-        // ✅ TAMBAHKAN INI
-        foreach ($topics as &$t) {
-            $messages = $this->forum_model->get_messages($t['id']);
+    //     // ✅ TAMBAHKAN INI
+    //     foreach ($topics as &$t) {
+    //         $messages = $this->forum_model->get_messages($t['id']);
 
-            // handle berbagai kemungkinan format
-            if (isset($messages['messages'])) {
-                $t['total_messages'] = count($messages['messages']);
-            } else {
-                $t['total_messages'] = is_array($messages) ? count($messages) : 0;
-            }
-        }
+    //         // handle berbagai kemungkinan format
+    //         if (isset($messages['messages'])) {
+    //             $t['total_messages'] = count($messages['messages']);
+    //         } else {
+    //             $t['total_messages'] = is_array($messages) ? count($messages) : 0;
+    //         }
+    //     }
 
-        $this->output->set_content_type('application/json')
-            ->set_output(json_encode($topics));
-    }
+    //     $this->output->set_content_type('application/json')
+    //         ->set_output(json_encode($topics));
+    // }
 
     // API: notifications for topics the user joined (recent messages by others)
     public function notifications()
@@ -396,5 +397,58 @@ class Forum extends CI_Controller
         $deleted = $this->forum_model->delete_message_for_user($id, $user_id);
 
         echo json_encode(['success' => $deleted]);
+    }
+
+    // =====================ARSIP TOPIK=====================
+    public function archive_topic($id = null)
+    {
+        if ($this->input->server('REQUEST_METHOD') !== 'POST') {
+            return $this->output->set_status_header(405)
+                ->set_output(json_encode(['error' => 'Method not allowed']));
+        }
+
+        if (!$id) {
+            return $this->output->set_status_header(400)
+                ->set_output(json_encode(['error' => 'Missing id']));
+        }
+
+        $success = $this->forum_model->archive_topic($id);
+
+        if (!$success) {
+            return $this->output->set_status_header(500)
+                ->set_output(json_encode(['error' => 'Gagal arsipkan topik']));
+        }
+
+        return $this->output->set_content_type('application/json')
+            ->set_output(json_encode(['success' => true]));
+    }
+
+    public function arsip()
+    {
+        if (!$this->session->userdata('logged_in')) {
+            redirect('auth/login');
+            return;
+        }
+
+        $data['topics'] = $this->forum_model->get_archived_topics();
+
+        $this->load->view('forum/arsip', $data);
+    }
+
+    public function close_topic($id)
+    {
+        $topics = $this->Forum_model->get_topics();
+
+        foreach ($topics as &$t) {
+            if ($t['id'] == $id) {
+                $t['archived'] = true;
+                break;
+            }
+        }
+
+        // simpan kembali ke JSON
+        file_put_contents(FCPATH . 'forums_data/topics.json', json_encode($topics, JSON_PRETTY_PRINT));
+
+        echo json_encode(['success' => true]);
     }
 }

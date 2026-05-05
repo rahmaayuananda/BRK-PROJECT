@@ -24,6 +24,13 @@ class Forum_model extends CI_Model
         if (!file_exists($this->topics_file)) {
             file_put_contents($this->topics_file, json_encode([]));
         }
+
+        //arsip topik
+        $this->archived_file = $this->storage_path . 'archived_topics.json';
+
+        if (!file_exists($this->archived_file)) {
+            file_put_contents($this->archived_file, json_encode([]));
+        }
     }
 
     // ========================
@@ -55,9 +62,10 @@ class Forum_model extends CI_Model
 
         // pakai parameter dari controller
         if (!$created_by) {
-            $created_by = $this->session->userdata('nama_lengkap')
-                ?: $this->session->userdata('nip')
-                ?: 'Guest';
+            // $created_by = $this->session->userdata('nama_lengkap')
+            //     ?: $this->session->userdata('nip')
+            //     ?: 'Guest';
+            $created_by = $this->session->userdata('nip') ?: 'Guest';
         }
 
         $topic = [
@@ -84,13 +92,37 @@ class Forum_model extends CI_Model
     // ========================
     // FIND TOPIC
     // ========================
+    // public function find_topic($id)
+    // {
+    //     $topics = $this->get_topics();
+    //     foreach ($topics as $t) {
+    //         if ($t['id'] == $id)
+    //             return $t;
+    //     }
+    //     return null;
+    // }
+
     public function find_topic($id)
     {
+        // 🔍 cek di topic aktif
         $topics = $this->get_topics();
         foreach ($topics as $t) {
-            if ($t['id'] == $id)
+            if ($t['id'] == $id) {
                 return $t;
+            }
         }
+
+        // 🔍 cek di arsip
+        $archived = json_decode(@file_get_contents($this->archived_file), true);
+        if (is_array($archived)) {
+            foreach ($archived as $t) {
+                if ($t['id'] == $id) {
+                    $t['archived'] = true; // 🔥 tandai
+                    return $t;
+                }
+            }
+        }
+
         return null;
     }
 
@@ -486,5 +518,78 @@ class Forum_model extends CI_Model
     public function add_log($data)
     {
         return $this->db->insert('activity_log', $data);
+    }
+
+    public function get_topics_by_creator($username)
+    {
+        $topics = $this->get_topics();
+        $result = [];
+
+        foreach ($topics as $t) {
+            $creator = strtolower(trim($t['created_by'] ?? ''));
+            $user = strtolower(trim($username));
+
+            if ($creator === $user) {
+
+                // hitung jumlah message
+                $messages = $this->get_messages($t['id']);
+                $t['total_messages'] = is_array($messages) ? count($messages) : 0;
+
+                $result[] = $t;
+            }
+        }
+
+        // sorting terbaru
+        usort($result, function ($a, $b) {
+            return ($b['created_at'] ?? 0) - ($a['created_at'] ?? 0);
+        });
+
+        return $result;
+    }
+
+    // ============================ARSIP TOPIK============================
+    public function archive_topic($id)
+    {
+        $topics = $this->get_topics();
+        $archived = json_decode(@file_get_contents($this->archived_file), true);
+        if (!is_array($archived))
+            $archived = [];
+
+        $found = null;
+
+        foreach ($topics as $k => $t) {
+            if ($t['id'] == $id) {
+                $found = $t;
+                unset($topics[$k]);
+                break;
+            }
+        }
+
+        if (!$found)
+            return false;
+
+        // tambahkan flag arsip
+        $found['archived_at'] = time();
+
+        $archived[] = $found;
+
+        // simpan ulang
+        file_put_contents($this->topics_file, json_encode(array_values($topics), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        file_put_contents($this->archived_file, json_encode($archived, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+        return true;
+    }
+
+    public function get_archived_topics()
+    {
+        $data = json_decode(@file_get_contents($this->archived_file), true);
+        if (!is_array($data))
+            return [];
+
+        usort($data, function ($a, $b) {
+            return ($b['archived_at'] ?? 0) - ($a['archived_at'] ?? 0);
+        });
+
+        return $data;
     }
 }

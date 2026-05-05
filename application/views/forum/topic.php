@@ -12,6 +12,7 @@
     <script>
         const TOPIC_ID = '<?php echo $topic['id'] ?? ''; ?>';
         const USER_ROLE = '<?php echo $this->session->userdata('role'); ?>';
+        const IS_ARCHIVED = <?php echo (!empty($topic['archived']) ? 'true' : 'false'); ?>;
     </script>
 
     <style>
@@ -497,18 +498,22 @@
             <section class="content">
 
                 <div class="message-wrapper">
-                    <?php if ($this->session->userdata('role') === 'user'): ?>
-                        <button id="joinTopicBtn" class="btn primary join-btn">Bergabung</button>
+                    <?php if (!empty($topic['archived'])): ?>
+                        <div
+                            style="margin-bottom:12px; padding:12px; background:#fef3c7; color:#92400e; border-radius:10px; font-weight:500; text-align:center;">
+                            🔒 Diskusi ini telah ditutup. Anda tidak dapat mengirim pesan lagi.
+                        </div>
                     <?php endif; ?>
-
                     <div class="messages" id="messages"></div>
                 </div>
                 <!-- <div class="messages" id="messages"></div> -->
 
                 <div class="composer">
                     <div class="composer-row">
-                        <input type="text" id="message" placeholder="Tulis pesan (maks 50 karakter)">
-                        <button id="sendBtn" class="btn primary">Kirim</button>
+                        <input type="text" id="message" placeholder="Tulis pesan (maks 50 karakter)" <?php echo !empty($topic['archived']) ? 'disabled' : ''; ?>>
+                        <button id="sendBtn" class="btn primary" <?php echo !empty($topic['archived']) ? 'disabled' : ''; ?>>
+                            Kirim
+                        </button>
                     </div>
                 </div>
 

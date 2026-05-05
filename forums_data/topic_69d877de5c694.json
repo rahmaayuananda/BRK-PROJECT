@@ -1,1 +1,16 @@
-[]
+[
+    {
+        "id": "69f9a54b9a04a",
+        "message": "p",
+        "created_at": 1777968459,
+        "created_by": "Rahma Ayu Ananda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg"
+    },
+    {
+        "id": "69f9a551ac5ca",
+        "message": "testing",
+        "created_at": 1777968465,
+        "created_by": "Rahma Ayu Ananda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg"
+    }
+]

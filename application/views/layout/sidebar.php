@@ -30,6 +30,12 @@ else {
     } elseif ($seg1 == 'forum' && $seg2 == 'my_topics') {
         $my_active = 'active';
 
+    } elseif ($seg1 == 'forum' && $seg2 == 'arsip') {
+        $arsip_active = 'active'; // ✅ TAMBAHKAN INI
+
+    } elseif ($seg1 == 'forum' && $seg2 == 'faq') {
+        $faq_active = 'active'; // sekalian biar lengkap
+
     } elseif ($seg1 == 'forum') {
         $all_active = 'active';
     }
@@ -57,11 +63,6 @@ else {
                 </a>
             </li>
 
-            <!-- <li class="<?= $my_active ?>">
-                <a href="<?= site_url('forum/my_topics'); ?>">
-                    <span class="icon">📌</span> My Topics
-                </a>
-            </li> -->
             <?php if ($this->session->userdata('role') === 'user'): ?>
                 <li class="<?= $my_active ?>">
                     <a href="<?= site_url('forum/my_topics'); ?>">
@@ -69,6 +70,18 @@ else {
                     </a>
                 </li>
             <?php endif; ?>
+
+            <li class="<?= $arsip_active ?? '' ?>">
+                <a href="<?= site_url('forum/arsip'); ?>">
+                    <span class="icon">🗂️</span> Arsip
+                </a>
+            </li>
+
+            <li class="<?= $faq_active ?? '' ?>">
+                <a href="<?= site_url('forum/faq'); ?>">
+                    <span class="icon">❓</span> FAQ
+                </a>
+            </li>
         </ul>
     </div>
 

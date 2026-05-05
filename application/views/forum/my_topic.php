@@ -362,12 +362,12 @@
                                                 stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
                                         </svg><span><?php echo isset($t['total_messages']) ? $t['total_messages'] : 0; ?></span>
                                     </div>
-                                    <div style="margin-top:6px">
+                                    <!-- <div style="margin-top:6px">
                                         <a class="open-btn topic-action"
                                             href="<?php echo site_url('forum/topic/' . $t['id']) . '?from=my_topics&return=' . urlencode(current_url()); ?>">
                                             Buka
                                         </a>
-                                    </div>
+                                    </div> -->
                                     <?php if (isset($t['created_by']) && ($t['created_by'] == $current_nip || $t['created_by'] == $current_username || $t['created_by'] == $current_id || $t['created_by'] == $current_fullname)): ?>
                                         <div style="margin-top:6px">
                                             <button class="topic-action btn danger delete-btn"
@@ -455,13 +455,8 @@
                         info.appendChild(a); info.appendChild(ex); info.appendChild(meta);
 
                         const stats = document.createElement('div'); stats.className = 'stats';
-                        const stat = document.createElement('div'); stat.className = 'stat'; const total = t.total_messages ? t.total_messages : 0; stat.innerHTML = `<svg viewBox="0 0 24 24" fill="none"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"stroke="#6b7280" stroke-width="1.2"/></svg><span>${total}</span>
-`;
+                        const stat = document.createElement('div'); stat.className = 'stat'; const total = t.total_messages ? t.total_messages : 0; stat.innerHTML = `<svg viewBox="0 0 24 24" fill="none"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"stroke="#6b7280" stroke-width="1.2"/></svg><span>${total}</span>`;
                         stats.appendChild(stat);
-                        const openWrap = document.createElement('div'); openWrap.style.marginTop = '6px';
-                        const openBtn = document.createElement('a'); openBtn.className = 'open-btn topic-action'; openBtn.href = '<?php echo site_url('forum/topic/'); ?>' + t.id + '?from=my_topics&return=' + encodeURIComponent(window.location.href); openBtn.textContent = 'Buka';
-                        openWrap.appendChild(openBtn);
-                        stats.appendChild(openWrap);
 
                         const currentUsername = <?php echo json_encode($this->session->userdata('nip') ?? $this->session->userdata('username') ?? $this->session->userdata('id_users') ?? ''); ?>;
                         if (t.created_by === currentUsername) {

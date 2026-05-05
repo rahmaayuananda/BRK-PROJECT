@@ -244,6 +244,20 @@
             color: var(--accent);
             font-weight: 600;
         }
+
+        .topic-action.close-btn {
+            background: #f59e0b;
+            color: #fff;
+        }
+
+        .topic-action.faq-btn {
+            background: #10b981;
+            color: #fff;
+        }
+
+        .topic-action i {
+            margin-right: 4px;
+        }
     </style>
 </head>
 
@@ -284,18 +298,32 @@
                                         <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" stroke="#6b7280"
                                             stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
                                     </svg><span><?php echo $msg_count; ?></span></div>
-                                <div style="margin-top:6px"><a class="open-btn topic-action"
-                                        href="<?php echo site_url('forum/topic/' . $t['id']); ?>">Buka</a></div>
+                                <!-- <div style="margin-top:6px"><a class="open-btn topic-action"
+                                        href="<?php echo site_url('forum/topic/' . $t['id']); ?>">Buka</a></div> -->
 
                                 <!-- hapus button, hanya tampil jika user pembuat topik sama dengan user yang login -->
-                                <!-- <?php if ($current_role === 'admin' || $t['created_by'] == $current_user): ?>
-                                    <div style="margin-top:6px">
+                                <?php if ($current_role === 'admin' || $t['created_by'] == $current_user): ?>
+                                    <div style="margin-top:6px; display:flex; gap:6px; flex-wrap:wrap;">
+
+                                        <!-- HAPUS -->
                                         <button class="topic-action delete-btn"
                                             onclick="openDeleteModal('<?php echo $t['id']; ?>', <?php echo json_encode($t['title'] ?? ''); ?>)">
-                                            Hapus
+                                            🗑️ Hapus
                                         </button>
+
+                                        <!-- TUTUP DISKUSI -->
+                                        <button class="topic-action close-btn"
+                                            onclick="handleCloseTopic('<?php echo $t['id']; ?>')">
+                                            🔒 Tutup
+                                        </button>
+
+                                        <!-- JADIKAN FAQ -->
+                                        <button class="topic-action faq-btn" onclick="handleSetFAQ('<?php echo $t['id']; ?>')">
+                                            ⭐ FAQ
+                                        </button>
+
                                     </div>
-                                <?php endif; ?> -->
+                                <?php endif; ?>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -388,43 +416,45 @@
                     const isAdmin = currentRole === 'admin';
 
                     if (isAdmin || isOwner) {
-                        const delWrap = document.createElement('div');
-                        delWrap.style.marginTop = '6px';
+                        const actionWrap = document.createElement('div');
+                        actionWrap.style.marginTop = '6px';
+                        actionWrap.style.display = 'flex';
+                        actionWrap.style.gap = '6px';
+                        actionWrap.style.flexWrap = 'wrap';
 
+                        // DELETE
                         const delBtn = document.createElement('button');
-                        delBtn.textContent = 'Hapus';
+                        delBtn.innerHTML = '🗑️ Hapus';
                         delBtn.className = 'topic-action delete-btn';
-
                         delBtn.onclick = function (e) {
                             e.stopPropagation();
                             openDeleteModal(t.id, t.title);
                         };
 
-                        delWrap.appendChild(delBtn);
-                        stats.appendChild(delWrap);
+                        // CLOSE DISCUSSION
+                        const closeBtn = document.createElement('button');
+                        closeBtn.innerHTML = '🔒 Tutup';
+                        closeBtn.className = 'topic-action close-btn';
+                        closeBtn.onclick = function (e) {
+                            e.stopPropagation();
+                            handleCloseTopic(t.id);
+                        };
+
+                        // SET FAQ
+                        const faqBtn = document.createElement('button');
+                        faqBtn.innerHTML = '⭐ FAQ';
+                        faqBtn.className = 'topic-action faq-btn';
+                        faqBtn.onclick = function (e) {
+                            e.stopPropagation();
+                            handleSetFAQ(t.id);
+                        };
+
+                        actionWrap.appendChild(delBtn);
+                        actionWrap.appendChild(closeBtn);
+                        actionWrap.appendChild(faqBtn);
+
+                        stats.appendChild(actionWrap);
                     }
-
-                    // add open button
-                    const openWrap = document.createElement('div'); openWrap.style.marginTop = '6px';
-                    const openBtn = document.createElement('a'); openBtn.className = 'open-btn topic-action'; openBtn.href = '<?php echo site_url('forum/topic/'); ?>' + t.id + '?from=all_topics'; openBtn.textContent = 'Buka';
-                    openWrap.appendChild(openBtn);
-                    stats.appendChild(openWrap);
-
-                    // if (String(t.created_by).trim().toLowerCase() === String(currentUser).trim().toLowerCase()) {
-                    //     const delWrap = document.createElement('div');
-                    //     delWrap.style.marginTop = '6px';
-
-                    //     const delBtn = document.createElement('button');
-                    //     delBtn.textContent = 'Hapus';
-                    //     delBtn.className = 'topic-action delete-btn';
-                    //     delBtn.onclick = function (e) {
-                    //         e.stopPropagation();
-                    //         openDeleteModal(t.id, t.title);
-                    //     };
-
-                    //     delWrap.appendChild(delBtn);
-                    //     stats.appendChild(delWrap);
-                    // }
 
                     card.appendChild(avatar); card.appendChild(info); card.appendChild(stats);
                     cont.appendChild(card);
@@ -641,6 +671,32 @@
             el.style.display = 'block';
             clearTimeout(window.__globalAlertTimeout);
             window.__globalAlertTimeout = setTimeout(() => { try { el.style.display = 'none'; } catch (e) { } }, 3000);
+        }
+
+        // =====================ARSIP TOPIK JS=====================
+        function handleCloseTopic(id) {
+            if (!confirm('Tutup diskusi ini?')) return;
+
+            fetch('<?php echo site_url('forum/archive_topic/'); ?>' + id, {
+                method: 'POST'
+            })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.success) {
+                        showGlobalAlert('Topik berhasil diarsipkan', 'success');
+                        refreshTopics();
+                    } else {
+                        showGlobalAlert(res.error || 'Gagal', 'error');
+                    }
+                })
+                .catch(() => {
+                    showGlobalAlert('Terjadi kesalahan', 'error');
+                });
+        }
+
+        // =====================FAQ TOPIK JS=====================
+        function handleSetFAQ(id) {
+            showGlobalAlert('Fitur Jadikan FAQ (ID: ' + id + ') belum dibuat', 'success');
         }
     </script>
 </body>
