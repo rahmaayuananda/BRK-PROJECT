@@ -51,6 +51,18 @@ class Forum extends CI_Controller
     public function topics()
     {
         $topics = $this->forum_model->get_topics();
+        foreach ($topics as &$t) {
+            $messages = $this->forum_model->get_messages($t['id']);
+            $t['total_messages'] = is_array($messages) ? count($messages) : 0;
+        }
+        $this->output->set_content_type('application/json')->set_output(json_encode($topics));
+    }
+
+    // API: get user topics as JSON
+    public function user_topics()
+    {
+        $username = $this->session->userdata('nama_lengkap') ?: $this->session->userdata('nip');
+        $topics = $this->forum_model->get_topics_by_creator($username);
         $this->output->set_content_type('application/json')->set_output(json_encode($topics));
     }
 
@@ -377,7 +389,12 @@ class Forum extends CI_Controller
             return;
         }
 
-        $data['topics'] = $this->forum_model->get_archived_topics();
+        $topics = $this->forum_model->get_archived_topics();
+        foreach ($topics as &$t) {
+            $messages = $this->forum_model->get_messages($t['id']);
+            $t['total_messages'] = is_array($messages) ? count($messages) : 0;
+        }
+        $data['topics'] = $topics;
 
         $this->load->view('forum/arsip', $data);
     }
@@ -405,7 +422,12 @@ class Forum extends CI_Controller
             return;
         }
 
-        $data['topics'] = $this->forum_model->get_faq_topics(); // 🔥 nanti kita buat ini
+        $topics = $this->forum_model->get_faq_topics();
+        foreach ($topics as &$t) {
+            $messages = $this->forum_model->get_messages($t['id']);
+            $t['total_messages'] = is_array($messages) ? count($messages) : 0;
+        }
+        $data['topics'] = $topics;
 
         $this->load->view('forum/faq', $data);
     }

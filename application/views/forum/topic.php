@@ -504,6 +504,11 @@
                             style="margin-bottom:12px; padding:12px; background:#fef3c7; color:#92400e; border-radius:10px; font-weight:500; text-align:center;">
                             🔒 Diskusi ini telah ditutup. Anda tidak dapat mengirim pesan lagi.
                         </div>
+                    <?php elseif (!empty($topic['is_faq'])): ?>
+                        <div
+                            style="margin-bottom:12px; padding:12px; background:#e0f2fe; color:#0369a1; border-radius:10px; font-weight:500; text-align:center;">
+                            ℹ️ Ini adalah halaman FAQ. Anda hanya dapat melihat riwayat pesan.
+                        </div>
                     <?php endif; ?>
                     <div class="messages" id="messages"></div>
                 </div>
@@ -511,8 +516,9 @@
 
                 <div class="composer">
                     <div class="composer-row">
-                        <input type="text" id="message" placeholder="Tulis pesan (maks 50 karakter)" <?php echo !empty($topic['archived']) ? 'disabled' : ''; ?>>
-                        <button id="sendBtn" class="btn primary" <?php echo !empty($topic['archived']) ? 'disabled' : ''; ?>>
+                        <?php $is_readonly = !empty($topic['archived']) || !empty($topic['is_faq']); ?>
+                        <input type="text" id="message" placeholder="Tulis pesan (maks 50 karakter)" <?php echo $is_readonly ? 'disabled' : ''; ?>>
+                        <button id="sendBtn" class="btn primary" <?php echo $is_readonly ? 'disabled' : ''; ?>>
                             Kirim
                         </button>
                     </div>

@@ -45,8 +45,9 @@ $subtitle = isset($subtitle) ? $subtitle : '';
     <div class="controls">
         <?php if ($show_sort): ?>
             <select id="sortSelect">
-                <option value="latest">Latest</option>
-                <option value="oldest">Oldest</option>
+                <option value="latest">Terbaru</option>
+                <option value="oldest">Terlama</option>
+                <option value="popular">Terpopuler</option>
             </select>
         <?php endif; ?>
 

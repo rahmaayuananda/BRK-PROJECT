@@ -166,9 +166,10 @@
 
                     <?php if (!empty($topics)): ?>
                         <?php foreach ($topics as $t): ?>
-                            <pre><?php print_r($t); ?></pre> <!-- 🔥 TARUH DI SINI -->
                             <div class="topic-card"
-                                data-href="<?php echo site_url('forum/topic/' . $t['id']) . '?from=faq&return=' . urlencode(current_url()); ?>">
+                                data-href="<?php echo site_url('forum/topic/' . $t['id']) . '?from=faq&return=' . urlencode(current_url()); ?>"
+                                data-time="<?php echo $t['created_at'] ?? 0; ?>"
+                                data-messages="<?php echo isset($t['total_messages']) ? $t['total_messages'] : 0; ?>">
 
                                 <div class="avatar">
                                     <?php echo strtoupper(mb_substr($t['title'], 0, 1)); ?>
@@ -242,6 +243,30 @@
                 }
             });
     }
+
+    document.getElementById('sortSelect')?.addEventListener('change', function () {
+        const sortVal = this.value;
+        const container = document.querySelector('.topic-list');
+        const cards = Array.from(container.querySelectorAll('.topic-card'));
+
+        cards.sort((a, b) => {
+            if (sortVal === 'latest') return b.dataset.time - a.dataset.time;
+            if (sortVal === 'oldest') return a.dataset.time - b.dataset.time;
+            if (sortVal === 'popular') return b.dataset.messages - a.dataset.messages;
+            return 0;
+        });
+
+        cards.forEach(card => container.appendChild(card));
+    });
+
+    document.getElementById('searchInput')?.addEventListener('input', function () {
+        const query = this.value.toLowerCase();
+        document.querySelectorAll('.topic-card').forEach(card => {
+            const title = card.querySelector('.topic-title').textContent.toLowerCase();
+            if (title.includes(query)) card.style.display = '';
+            else card.style.display = 'none';
+        });
+    });
 </script>
 
 </html>

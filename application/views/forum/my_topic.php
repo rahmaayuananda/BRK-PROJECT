@@ -412,6 +412,7 @@
                     const sortVal = document.getElementById('sortSelect').value;
                     if (sortVal === 'latest') data.sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
                     else if (sortVal === 'oldest') data.sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
+                    else if (sortVal === 'popular') data.sort((a, b) => (b.total_messages || 0) - (a.total_messages || 0));
 
                     const cont = document.querySelector('.topic-list');
                     const search = document.getElementById('searchInput').value.trim().toLowerCase();

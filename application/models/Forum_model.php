@@ -88,7 +88,13 @@ class Forum_model extends CI_Model
         }
 
         // ✅ BUAT DATA TOPIC
-        $id = uniqid();
+        $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $title)));
+        $slug = trim($slug, '-');
+        if (empty($slug)) {
+            $slug = 'topic';
+        }
+        $id = $slug . '-' . substr(uniqid(), -5);
+
         $topic = [
             'id' => $id,
             'title' => trim($title),
@@ -134,11 +140,14 @@ class Forum_model extends CI_Model
 
     public function find_topic($id)
     {
-        // 🔍 cek di topic aktif
-        $topics = $this->get_topics();
-        foreach ($topics as $t) {
-            if ($t['id'] == $id) {
-                return $t;
+        // 🔍 cek di semua topic (termasuk FAQ)
+        $json = @file_get_contents($this->topics_file);
+        $topics = json_decode($json, true);
+        if (is_array($topics)) {
+            foreach ($topics as $t) {
+                if ($t['id'] == $id) {
+                    return $t;
+                }
             }
         }
 

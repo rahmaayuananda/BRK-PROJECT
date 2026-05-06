@@ -384,6 +384,7 @@
                 const sortVal = document.getElementById('sortSelect').value;
                 if (sortVal === 'latest') data.sort((a, b) => b.created_at - a.created_at);
                 else if (sortVal === 'oldest') data.sort((a, b) => a.created_at - b.created_at);
+                else if (sortVal === 'popular') data.sort((a, b) => (b.total_messages || 0) - (a.total_messages || 0));
 
                 const cont = document.querySelector('.topic-list');
                 const search = document.getElementById('searchInput').value.trim().toLowerCase();
@@ -411,7 +412,7 @@
                     info.appendChild(a); info.appendChild(ex); info.appendChild(meta);
 
                     const stats = document.createElement('div'); stats.className = 'stats';
-                    const stat = document.createElement('div'); stat.className = 'stat'; stat.innerHTML = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" stroke="#6b7280" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>0</span>';
+                    const stat = document.createElement('div'); stat.className = 'stat'; stat.innerHTML = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" stroke="#6b7280" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>${t.total_messages || 0}</span>`;
                     stats.appendChild(stat);
 
                     // ROLE CHECK (admin / owner)
@@ -468,14 +469,7 @@
                     card.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); var href = this.getAttribute('data-href'); if (href) window.location.href = href; } });
                     card.style.cursor = 'pointer';
 
-                    // load message count (lightweight per-topic)
-                    (async function (el, id) {
-                        try {
-                            const r = await fetch('<?php echo site_url('forum/messages/'); ?>' + id);
-                            const msgs = await r.json();
-                            const span = el.querySelector('.stat span'); if (span) span.textContent = msgs.length;
-                        } catch (e) { }
-                    })(card, t.id);
+
                 }
             } catch (e) { console.error(e); }
         }
