@@ -305,22 +305,25 @@
                                 <?php if ($current_role === 'admin' || $t['created_by'] == $current_user): ?>
                                     <div style="margin-top:6px; display:flex; gap:6px; flex-wrap:wrap;">
 
-                                        <!-- HAPUS -->
+                                        <!-- HAPUS (admin & owner) -->
                                         <button class="topic-action delete-btn"
                                             onclick="openDeleteModal('<?php echo $t['id']; ?>', <?php echo json_encode($t['title'] ?? ''); ?>)">
                                             🗑️ Hapus
                                         </button>
 
-                                        <!-- TUTUP DISKUSI -->
+                                        <!-- TUTUP DISKUSI (admin & owner) -->
                                         <button class="topic-action close-btn"
                                             onclick="handleCloseTopic('<?php echo $t['id']; ?>')">
                                             🔒 Tutup
                                         </button>
 
-                                        <!-- JADIKAN FAQ -->
-                                        <button class="topic-action faq-btn" onclick="handleSetFAQ('<?php echo $t['id']; ?>')">
-                                            ⭐ FAQ
-                                        </button>
+                                        <!-- FAQ (KHUSUS ADMIN SAJA) -->
+                                        <?php if ($current_role === 'admin'): ?>
+                                            <button type="button" class="topic-action faq-btn"
+                                                onclick="handleSetFAQ('<?php echo $t['id']; ?>')">
+                                                ⭐ FAQ
+                                            </button>
+                                        <?php endif; ?>
 
                                     </div>
                                 <?php endif; ?>
@@ -430,8 +433,9 @@
                             e.stopPropagation();
                             openDeleteModal(t.id, t.title);
                         };
+                        actionWrap.appendChild(delBtn);
 
-                        // CLOSE DISCUSSION
+                        // CLOSE
                         const closeBtn = document.createElement('button');
                         closeBtn.innerHTML = '🔒 Tutup';
                         closeBtn.className = 'topic-action close-btn';
@@ -439,19 +443,19 @@
                             e.stopPropagation();
                             handleCloseTopic(t.id);
                         };
-
-                        // SET FAQ
-                        const faqBtn = document.createElement('button');
-                        faqBtn.innerHTML = '⭐ FAQ';
-                        faqBtn.className = 'topic-action faq-btn';
-                        faqBtn.onclick = function (e) {
-                            e.stopPropagation();
-                            handleSetFAQ(t.id);
-                        };
-
-                        actionWrap.appendChild(delBtn);
                         actionWrap.appendChild(closeBtn);
-                        actionWrap.appendChild(faqBtn);
+
+                        // FAQ → hanya admin
+                        if (isAdmin) {
+                            const faqBtn = document.createElement('button');
+                            faqBtn.innerHTML = '⭐ FAQ';
+                            faqBtn.className = 'topic-action faq-btn';
+                            faqBtn.onclick = function (e) {
+                                e.stopPropagation();
+                                handleSetFAQ(t.id);
+                            };
+                            actionWrap.appendChild(faqBtn);
+                        }
 
                         stats.appendChild(actionWrap);
                     }
@@ -696,7 +700,28 @@
 
         // =====================FAQ TOPIK JS=====================
         function handleSetFAQ(id) {
-            showGlobalAlert('Fitur Jadikan FAQ (ID: ' + id + ') belum dibuat', 'success');
+            console.log("FAQ CLICKED:", id); // 👈 tambah ini
+
+            if (!confirm('Jadikan topik ini sebagai FAQ?')) return;
+
+            fetch('<?php echo site_url('forum/set_faq/'); ?>' + id, {
+                method: 'POST'
+            })
+                .then(res => res.json())
+                .then(res => {
+                    console.log("RESPONSE:", res); // 👈 tambah ini
+
+                    if (res.success) {
+                        showGlobalAlert('Topik berhasil dijadikan FAQ', 'success');
+                        refreshTopics();
+                    } else {
+                        showGlobalAlert('Gagal menjadikan FAQ', 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error("ERROR:", err); // 👈 penting
+                    showGlobalAlert('Terjadi kesalahan', 'error');
+                });
         }
     </script>
 </body>

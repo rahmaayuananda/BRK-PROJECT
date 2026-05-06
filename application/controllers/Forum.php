@@ -32,13 +32,14 @@ class Forum extends CI_Controller
         if (!$id)
             show_404();
 
+        // ✅ PAKAI find_topic (bisa ambil FAQ & arsip)
         $topic = $this->forum_model->find_topic($id);
+
         if (!$topic)
             show_404();
 
         $data['topic'] = $topic;
 
-        // ✅ TAMBAHKAN INI
         $data['seg1'] = $this->uri->segment(1);
         $data['seg2'] = $this->uri->segment(2);
         $data['from'] = $this->input->get('from');
@@ -159,30 +160,6 @@ class Forum extends CI_Controller
             ->set_output(json_encode($entry));
     }
 
-    // public function join_topic()
-    // {
-    //     if ($this->input->server('REQUEST_METHOD') !== 'POST') {
-    //         $this->output->set_status_header(405)->set_content_type('application/json')->set_output(json_encode(['error' => 'Method not allowed']));
-    //         return;
-    //     }
-
-    //     if (!$this->session->userdata('logged_in')) {
-    //         $this->output->set_status_header(403)->set_content_type('application/json')->set_output(json_encode(['error' => 'Not logged in']));
-    //         return;
-    //     }
-
-    //     $topic_id = $this->input->post('topic_id', true);
-    //     if (!$topic_id) {
-    //         $this->output->set_status_header(400)->set_content_type('application/json')->set_output(json_encode(['error' => 'Missing topic_id']));
-    //         return;
-    //     }
-
-    //     $username = $this->session->userdata('nip');
-    //     $saved = $this->forum_model->join_topic($username, $topic_id);
-
-    //     $this->output->set_content_type('application/json')->set_output(json_encode(['success' => (bool) $saved]));
-    // }
-
     public function my_topics()
     {
         if (!$this->session->userdata('logged_in')) {
@@ -206,36 +183,6 @@ class Forum extends CI_Controller
         $this->load->view('forum/my_topic', $data);
     }
 
-    // API: return joined topics for current user (JSON)
-    // public function user_topics()
-    // {
-    //     if (!$this->session->userdata('logged_in')) {
-    //         $this->output->set_status_header(403)
-    //             ->set_content_type('application/json')
-    //             ->set_output(json_encode([]));
-    //         return;
-    //     }
-
-    //     $username = $this->session->userdata('nip');
-    //     $topics = $this->forum_model->get_user_topics($username);
-
-    //     // ✅ TAMBAHKAN INI
-    //     foreach ($topics as &$t) {
-    //         $messages = $this->forum_model->get_messages($t['id']);
-
-    //         // handle berbagai kemungkinan format
-    //         if (isset($messages['messages'])) {
-    //             $t['total_messages'] = count($messages['messages']);
-    //         } else {
-    //             $t['total_messages'] = is_array($messages) ? count($messages) : 0;
-    //         }
-    //     }
-
-    //     $this->output->set_content_type('application/json')
-    //         ->set_output(json_encode($topics));
-    // }
-
-    // API: notifications for topics the user joined (recent messages by others)
     public function notifications()
     {
         if (!$this->session->userdata('logged_in')) {
@@ -450,5 +397,23 @@ class Forum extends CI_Controller
         file_put_contents(FCPATH . 'forums_data/topics.json', json_encode($topics, JSON_PRETTY_PRINT));
 
         echo json_encode(['success' => true]);
+    }
+    public function faq()
+    {
+        if (!$this->session->userdata('logged_in')) {
+            redirect('auth/login');
+            return;
+        }
+
+        $data['topics'] = $this->forum_model->get_faq_topics(); // 🔥 nanti kita buat ini
+
+        $this->load->view('forum/faq', $data);
+    }
+
+    public function set_faq($id)
+    {
+        $success = $this->forum_model->set_faq($id);
+
+        echo json_encode(['success' => $success]);
     }
 }

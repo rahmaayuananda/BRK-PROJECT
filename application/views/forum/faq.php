@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Arsip - Forum</title>
+    <title>FAQ - Forum</title>
 
     <link rel="stylesheet" href="<?php echo base_url('assets/css/inter.css'); ?>">
     <link rel="stylesheet" href="<?php echo base_url('assets/css/forum.css'); ?>">
@@ -156,7 +156,7 @@
 
 <body>
     <div class="forum-app">
-        <?php $this->load->view('layout/header', ['page_title' => 'Arsip']); ?>
+        <?php $this->load->view('layout/header', ['page_title' => 'FAQ']); ?>
 
         <main class="main">
             <?php $this->load->view('layout/sidebar'); ?>
@@ -166,8 +166,10 @@
 
                     <?php if (!empty($topics)): ?>
                         <?php foreach ($topics as $t): ?>
+                            <pre><?php print_r($t); ?></pre> <!-- 🔥 TARUH DI SINI -->
                             <div class="topic-card"
-                                data-href="<?php echo site_url('forum/topic/' . $t['id']) . '?from=arsip&return=' . urlencode(current_url()); ?>">
+                                data-href="<?php echo site_url('forum/topic/' . $t['id']) . '?from=faq&return=' . urlencode(current_url()); ?>">
+
                                 <div class="avatar">
                                     <?php echo strtoupper(mb_substr($t['title'], 0, 1)); ?>
                                 </div>
@@ -178,7 +180,7 @@
                                     </div>
 
                                     <p class="excerpt">
-                                        Diskusi telah ditutup
+                                        Pertanyaan yang sering ditanyakan (FAQ)
                                     </p>
 
                                     <div class="meta">
@@ -188,15 +190,16 @@
                                 </div>
 
                                 <div class="stats">
-                                    <span style="color:#ef4444;font-weight:600;">
-                                        🔒 Closed
+                                    <span style="color:#10b981;font-weight:600;">
+                                        ⭐ FAQ
                                     </span>
                                 </div>
+
                             </div>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <div style="padding:20px;color:#6b7280">
-                            Belum ada arsip.
+                            Belum ada FAQ.
                         </div>
                     <?php endif; ?>
 
@@ -205,17 +208,16 @@
         </main>
     </div>
 </body>
+
 <script>
     document.querySelectorAll('.topic-card').forEach(card => {
         card.addEventListener('click', function (e) {
-            // biar kalau klik link/button ga double
             if (e.target.closest('a') || e.target.closest('button')) return;
 
             const href = this.getAttribute('data-href');
             if (href) window.location.href = href;
         });
 
-        // biar bisa pakai keyboard juga
         card.addEventListener('keydown', function (e) {
             if (e.key === 'Enter') {
                 const href = this.getAttribute('data-href');
@@ -225,6 +227,21 @@
 
         card.style.cursor = 'pointer';
     });
+
+    function handleSetFAQ(id) {
+        fetch('<?php echo site_url('forum/set_faq/'); ?>' + id, {
+            method: 'POST'
+        })
+            .then(res => res.json())
+            .then(res => {
+                if (res.success) {
+                    showGlobalAlert('Berhasil dijadikan FAQ', 'success');
+                    refreshTopics();
+                } else {
+                    showGlobalAlert('Gagal', 'error');
+                }
+            });
+    }
 </script>
 
 </html>

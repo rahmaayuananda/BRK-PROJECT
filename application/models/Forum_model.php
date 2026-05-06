@@ -41,12 +41,21 @@ class Forum_model extends CI_Model
         $json = @file_get_contents($this->topics_file);
         $topics = json_decode($json, true);
 
-        if (!is_array($topics))
+        if (!is_array($topics)) {
             $topics = [];
+        }
 
-        // sorting terbaru di atas
+        // 🔥 FILTER: buang yang FAQ
+        $topics = array_filter($topics, function ($t) {
+            return empty($t['is_faq']); // hanya yang bukan FAQ
+        });
+
+        // 🔥 REINDEX (PENTING)
+        $topics = array_values($topics);
+
+        // 🔥 SORTING terbaru
         usort($topics, function ($a, $b) {
-            return $b['created_at'] - $a['created_at'];
+            return ($b['created_at'] ?? 0) - ($a['created_at'] ?? 0);
         });
 
         return $topics;
@@ -57,17 +66,29 @@ class Forum_model extends CI_Model
     // ========================
     public function add_topic($title, $created_by = null)
     {
-        $topics = $this->get_topics();
-        $id = uniqid();
-
-        // pakai parameter dari controller
-        if (!$created_by) {
-            // $created_by = $this->session->userdata('nama_lengkap')
-            //     ?: $this->session->userdata('nip')
-            //     ?: 'Guest';
-            $created_by = $this->session->userdata('nip') ?: 'Guest';
+        // ✅ VALIDASI TITLE
+        if (!$title || trim($title) === '') {
+            return false;
         }
 
+        // ✅ AMBIL RAW DATA (BUKAN get_topics)
+        $json = @file_get_contents($this->topics_file);
+        $topics = json_decode($json, true);
+
+        if (!is_array($topics)) {
+            $topics = [];
+        }
+
+        // ✅ AMBIL USER SESSION DENGAN AMAN
+        if (!$created_by) {
+            $created_by = $this->session->userdata('nip');
+            if (!$created_by) {
+                $created_by = 'Guest';
+            }
+        }
+
+        // ✅ BUAT DATA TOPIC
+        $id = uniqid();
         $topic = [
             'id' => $id,
             'title' => trim($title),
@@ -75,13 +96,22 @@ class Forum_model extends CI_Model
             'created_by' => $created_by
         ];
 
+        // ✅ MASUKKAN KE AWAL
         array_unshift($topics, $topic);
 
-        file_put_contents(
+        // ✅ SIMPAN DENGAN LOCK (PENTING)
+        $save = file_put_contents(
             $this->topics_file,
-            json_encode($topics, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+            json_encode($topics, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
+            LOCK_EX
         );
 
+        // ❌ CEK GAGAL SIMPAN
+        if ($save === false) {
+            return false;
+        }
+
+        // ✅ BUAT FILE MESSAGE OTOMATIS
         $messages_file = $this->get_messages_file($id);
         if (!file_exists($messages_file)) {
             file_put_contents($messages_file, json_encode([]));
@@ -591,5 +621,51 @@ class Forum_model extends CI_Model
         });
 
         return $data;
+    }
+
+    //=========================FAQ=================================
+    public function set_faq($id)
+    {
+        // 🔥 ambil RAW data
+        $json = @file_get_contents($this->topics_file);
+        $topics = json_decode($json, true);
+
+        if (!is_array($topics)) {
+            return false;
+        }
+
+        foreach ($topics as &$t) {
+            if ($t['id'] == $id) {
+                $t['is_faq'] = 1;
+                break;
+            }
+        }
+
+        file_put_contents(
+            $this->topics_file,
+            json_encode($topics, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
+            LOCK_EX
+        );
+
+        return true;
+    }
+
+    public function get_faq_topics()
+    {
+        // 🔥 ambil langsung dari file (RAW)
+        $json = @file_get_contents($this->topics_file);
+        $topics = json_decode($json, true);
+
+        if (!is_array($topics)) {
+            return [];
+        }
+
+        // 🔥 filter yang is_faq = 1
+        $faq = array_filter($topics, function ($t) {
+            return !empty($t['is_faq']);
+        });
+
+        // 🔥 reindex
+        return array_values($faq);
     }
 }

@@ -13,6 +13,7 @@
         const TOPIC_ID = '<?php echo $topic['id'] ?? ''; ?>';
         const USER_ROLE = '<?php echo $this->session->userdata('role'); ?>';
         const IS_ARCHIVED = <?php echo (!empty($topic['archived']) ? 'true' : 'false'); ?>;
+        const IS_FAQ = <?php echo (!empty($topic['is_faq']) ? 'true' : 'false'); ?>;
     </script>
 
     <style>
