@@ -29,6 +29,11 @@ class Forum extends CI_Controller
 
     public function topic($id = null)
     {
+        if (!$this->session->userdata('logged_in')) {
+            redirect('auth/login');
+            return;
+        }
+
         if (!$id)
             show_404();
 
@@ -58,6 +63,18 @@ class Forum extends CI_Controller
         $this->output->set_content_type('application/json')->set_output(json_encode($topics));
     }
 
+    // API: get all users for mentions
+    public function get_users()
+    {
+        $users = $this->forum_model->get_all_users();
+        // Format names to use underscores for mention tags
+        $formatted_users = array_map(function($u) {
+            $u['mention_tag'] = str_replace(' ', '_', $u['nama_lengkap']);
+            return $u;
+        }, $users);
+        $this->output->set_content_type('application/json')->set_output(json_encode($formatted_users));
+    }
+
     // API: get user topics as JSON
     public function user_topics()
     {
@@ -69,6 +86,10 @@ class Forum extends CI_Controller
     // API: create topic
     public function create_topic()
     {
+        if (!$this->session->userdata('logged_in')) {
+            return $this->output->set_status_header(403)->set_output(json_encode(['error' => 'Belum login']));
+        }
+
         $title = $this->input->post('title', true);
         $title = trim($title);
         if ($title === '') {
@@ -93,6 +114,11 @@ class Forum extends CI_Controller
 
     public function messages($id = null)
     {
+        if (!$this->session->userdata('logged_in')) {
+            echo json_encode([]);
+            return;
+        }
+
         if (!$id) {
             echo json_encode([]);
             return;
@@ -115,21 +141,59 @@ class Forum extends CI_Controller
 
     public function post_message()
     {
+        if (!$this->session->userdata('logged_in')) {
+            return $this->output->set_status_header(403)->set_output(json_encode(['error' => 'Belum login']));
+        }
+
         $id = $this->input->post('topic_id', true);
         $message = $this->input->post('message', true);
 
-        if (!$id || $message === null) {
+        if (!$id) {
             $this->output->set_status_header(400)
                 ->set_output(json_encode(['error' => 'Invalid']));
             return;
         }
 
-        $message = trim($message);
-        if (mb_strlen($message) > 50) {
-            $message = mb_substr($message, 0, 50);
+        // Handle image upload
+        $image_name = null;
+        if (!empty($_FILES['image']['name'])) {
+            $upload_path = FCPATH . 'forums_data/images/';
+            if (!is_dir($upload_path)) {
+                mkdir($upload_path, 0755, true);
+            }
+
+            $config['upload_path'] = $upload_path;
+            $config['allowed_types'] = 'gif|jpg|png|jpeg|webp';
+            $config['max_size'] = 5120; // 5MB
+            $config['encrypt_name'] = TRUE;
+
+            $this->load->library('upload', $config);
+
+            if ($this->upload->do_upload('image')) {
+                $upload_data = $this->upload->data();
+                $image_name = $upload_data['file_name'];
+            } else {
+                $this->output->set_status_header(400)
+                    ->set_output(json_encode(['error' => $this->upload->display_errors('', '')]));
+                return;
+            }
         }
 
-        $message = $this->security->xss_clean($message);
+        if (empty($message) && !$image_name) {
+            $this->output->set_status_header(400)
+                ->set_output(json_encode(['error' => 'Message or image required']));
+            return;
+        }
+
+        if (!empty($message)) {
+            $message = trim($message);
+            if (mb_strlen($message) > 50) {
+                $message = mb_substr($message, 0, 50);
+            }
+            $message = $this->security->xss_clean($message);
+        } else {
+            $message = '';
+        }
 
         // ✅ ambil user
         $username = $this->session->userdata('nip');
@@ -154,10 +218,41 @@ class Forum extends CI_Controller
             'id' => uniqid(),
             'topic_id' => $id,
             'message' => $message,
+            'image' => $image_name,
             'created_by' => $fullname,
             'avatar' => $avatar,
             'created_at' => time()
         ];
+
+        // 🔥 Proses Mentions
+        if (preg_match_all('/@([a-zA-Z0-9_]+)/', $message, $matches)) {
+            $mentioned_tags = array_unique($matches[1]);
+            $all_users = $this->forum_model->get_all_users();
+            $topic_info = $this->forum_model->find_topic($id);
+            $topic_title = $topic_info ? $topic_info['title'] : 'Topik Forum';
+            
+            foreach ($mentioned_tags as $tag) {
+                foreach ($all_users as $u) {
+                    $u_tag = str_replace(' ', '_', $u['nama_lengkap']);
+                    if (strtolower($tag) === strtolower($u_tag)) {
+                        // Jangan mention diri sendiri
+                        if ($u['nip'] !== $username) {
+                            // Simpan notifikasi ke Activity_Log
+                            if (isset($this->db) && $this->db->table_exists('Activity_Log')) {
+                                $this->db->insert('Activity_Log', [
+                                    'user_id' => $u['id_users'] ?? 0,
+                                    'action' => 'mention',
+                                    'target_id' => $id, // topic_id
+                                    'description' => "{$fullname} menyebut Anda di: {$topic_title}",
+                                    'created_at' => date('Y-m-d H:i:s')
+                                ]);
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
 
         // ✅ simpan ke model
         $saved = $this->forum_model->add_message($id, $entry);
@@ -228,6 +323,35 @@ class Forum extends CI_Controller
         usort($notifs, function ($a, $b) {
             return ($b['created_at'] ?? 0) - ($a['created_at'] ?? 0);
         });
+        
+        // Ambil mention dari Activity_Log
+        $id_users = $this->session->userdata('id_users');
+        if ($id_users && isset($this->db) && $this->db->table_exists('Activity_Log')) {
+            $q = $this->db->where('user_id', $id_users)
+                          ->where('action', 'mention')
+                          ->order_by('created_at', 'DESC')
+                          ->limit(20)
+                          ->get('Activity_Log');
+            if ($q && $q->num_rows() > 0) {
+                foreach ($q->result_array() as $row) {
+                    $notifs[] = [
+                        'topic_id' => $row['target_id'],
+                        'topic_title' => 'Mention',
+                        'message' => $row['description'],
+                        'created_by' => 'Sistem',
+                        'created_at' => strtotime($row['created_at']),
+                        'avatar' => null,
+                        'is_mention' => true
+                    ];
+                }
+            }
+        }
+        
+        // Sort ulang setelah digabungkan
+        usort($notifs, function ($a, $b) {
+            return ($b['created_at'] ?? 0) - ($a['created_at'] ?? 0);
+        });
+
         $notifs = array_slice($notifs, 0, 50);
 
         $this->output->set_content_type('application/json')->set_output(json_encode($notifs));

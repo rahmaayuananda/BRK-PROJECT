@@ -16,6 +16,10 @@ if ($seg1 == 'forum' && $seg2 == 'topic') {
         $my_active = 'active';
     } elseif ($from == 'dashboard') {
         $dashboard_active = 'active';
+    } elseif ($from == 'arsip') {
+        $arsip_active = 'active';
+    } elseif ($from == 'faq') {
+        $faq_active = 'active';
     } else {
         $all_active = 'active'; // default
     }

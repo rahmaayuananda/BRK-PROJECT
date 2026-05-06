@@ -216,7 +216,7 @@ class Forum_model extends CI_Model
     // ========================
     public function add_message($id, $data)
     {
-        if (!isset($data['message']) || trim($data['message']) === '') {
+        if ((!isset($data['message']) || trim($data['message']) === '') && empty($data['image'])) {
             return false;
         }
 
@@ -235,7 +235,8 @@ class Forum_model extends CI_Model
 
         $entry = [
             'id' => $data['id'] ?? uniqid(),
-            'message' => trim($data['message']),
+            'message' => trim($data['message'] ?? ''),
+            'image' => $data['image'] ?? null,
             'created_at' => time(),
             'created_by' => $data['created_by'] ?? 'Unknown',
             'avatar' => $data['avatar'] ?? null
@@ -678,5 +679,40 @@ class Forum_model extends CI_Model
 
         // 🔥 reindex
         return array_values($faq);
+    }
+
+    public function get_all_users()
+    {
+        $users = [];
+        // Coba ambil dari DB table users
+        if (isset($this->db) && $this->db && $this->db->table_exists('users')) {
+            $q = $this->db->select('id_users, nip, nama_lengkap')->get('users');
+            if ($q && $q->num_rows() > 0) {
+                foreach ($q->result_array() as $row) {
+                    $users[] = [
+                        'id_users' => $row['id_users'],
+                        'nip' => $row['nip'],
+                        'nama_lengkap' => $row['nama_lengkap']
+                    ];
+                }
+                return $users;
+            }
+        }
+
+        // Fallback ke flatfile
+        $users_file = APPPATH . 'data/users.json';
+        if (file_exists($users_file)) {
+            $json = @file_get_contents($users_file);
+            $local = json_decode($json, true);
+            if (is_array($local)) {
+                foreach ($local as $nip => $u) {
+                    $users[] = [
+                        'nip' => $nip,
+                        'nama_lengkap' => $u['fullname'] ?? $nip
+                    ];
+                }
+            }
+        }
+        return $users;
     }
 }
