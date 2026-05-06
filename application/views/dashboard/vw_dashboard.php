@@ -268,11 +268,29 @@
             <section class="content">
 
                 <!-- Statistik -->
-                <div class="card stat-card">
-                    <div class="stat-icon">📊</div>
-                    <div>
-                        <div class="stat-title">Total Topik</div>
-                        <div class="stat-value"><?php echo intval($total_topics); ?></div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                    <div class="card stat-card">
+                        <div class="stat-icon" style="background: rgba(13, 110, 253, 0.1); color: #0d6efd;">📊</div>
+                        <div>
+                            <div class="stat-title">Total Topik</div>
+                            <div class="stat-value"><?php echo intval($total_topics); ?></div>
+                        </div>
+                    </div>
+
+                    <div class="card stat-card">
+                        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">⭐</div>
+                        <div>
+                            <div class="stat-title">Total FAQ</div>
+                            <div class="stat-value"><?php echo isset($total_faq) ? intval($total_faq) : 0; ?></div>
+                        </div>
+                    </div>
+
+                    <div class="card stat-card">
+                        <div class="stat-icon" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">🔒</div>
+                        <div>
+                            <div class="stat-title">Total Arsip</div>
+                            <div class="stat-value"><?php echo isset($total_arsip) ? intval($total_arsip) : 0; ?></div>
+                        </div>
                     </div>
                 </div>
 

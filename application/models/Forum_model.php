@@ -589,7 +589,9 @@ class Forum_model extends CI_Model
     // ============================ARSIP TOPIK============================
     public function archive_topic($id)
     {
-        $topics = $this->get_topics();
+        $topics = json_decode(@file_get_contents($this->topics_file), true);
+        if (!is_array($topics)) $topics = [];
+
         $archived = json_decode(@file_get_contents($this->archived_file), true);
         if (!is_array($archived))
             $archived = [];

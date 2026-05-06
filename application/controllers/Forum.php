@@ -394,6 +394,7 @@ class Forum extends CI_Controller
             $messages = $this->forum_model->get_messages($t['id']);
             $t['total_messages'] = is_array($messages) ? count($messages) : 0;
         }
+        unset($t);
         $data['topics'] = $topics;
 
         $this->load->view('forum/arsip', $data);
@@ -401,7 +402,9 @@ class Forum extends CI_Controller
 
     public function close_topic($id)
     {
-        $topics = $this->Forum_model->get_topics();
+        $json = @file_get_contents(FCPATH . 'forums_data/topics.json');
+        $topics = json_decode($json, true);
+        if (!is_array($topics)) $topics = [];
 
         foreach ($topics as &$t) {
             if ($t['id'] == $id) {
@@ -427,6 +430,7 @@ class Forum extends CI_Controller
             $messages = $this->forum_model->get_messages($t['id']);
             $t['total_messages'] = is_array($messages) ? count($messages) : 0;
         }
+        unset($t);
         $data['topics'] = $topics;
 
         $this->load->view('forum/faq', $data);

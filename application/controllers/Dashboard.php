@@ -13,6 +13,9 @@ class Dashboard extends CI_Controller
     public function index()
     {
         $data['total_topics'] = $this->forum_model->count_topics();
+        $data['total_faq'] = count($this->forum_model->get_faq_topics());
+        $data['total_arsip'] = count($this->forum_model->get_archived_topics());
+
         $data['latest_topics'] = $this->forum_model->get_latest_topics(5);
         $data['popular_topics'] = $this->forum_model->get_popular_topics(5);
         $data['recent_activity'] = $this->forum_model->get_recent_activity(10);
