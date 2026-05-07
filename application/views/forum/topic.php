@@ -504,6 +504,45 @@
             padding: 0 4px;
             border-radius: 4px;
         }
+
+        /* ===== IMAGE DOWNLOAD OVERLAY ===== */
+        .bubble-img-wrap {
+            position: relative;
+            display: inline-block;
+            width: fit-content;
+        }
+
+        .bubble-img-wrap .img-download-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(0, 0, 0, 0.55);
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: translateY(-4px);
+            transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease;
+            backdrop-filter: blur(4px);
+            z-index: 2;
+        }
+
+        .bubble-img-wrap:hover .img-download-btn {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .bubble-img-wrap .img-download-btn:hover {
+            background: rgba(13, 110, 253, 0.85);
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
+        }
     </style>
 </head>
 
@@ -604,9 +643,9 @@
     <div id="imageZoomModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); align-items: center; justify-content: center; z-index: 999999; flex-direction: column; backdrop-filter: blur(4px);">
         <button id="closeZoomBtn" style="position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.2); color: white; border: none; font-size: 24px; cursor: pointer; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s;">&times;</button>
         <img id="zoomedImage" src="" style="max-width: 90%; max-height: 75vh; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); object-fit: contain;">
-        <a id="downloadZoomBtn" href="" download class="btn primary" style="margin-top: 24px; padding: 12px 24px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; font-weight: 600; box-shadow: 0 8px 20px rgba(13, 110, 253, 0.4);">
+        <button id="downloadZoomBtn" class="btn primary" style="margin-top: 24px; padding: 12px 24px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; font-weight: 600; box-shadow: 0 8px 20px rgba(13, 110, 253, 0.4); cursor: pointer;">
             <i class="fa-solid fa-download"></i> Unduh Gambar
-        </a>
+        </button>
     </div>
 
     <script>
@@ -623,12 +662,32 @@
         const downloadZoomBtn = document.getElementById('downloadZoomBtn');
         const closeZoomBtn = document.getElementById('closeZoomBtn');
 
+        // --- UNIVERSAL DOWNLOAD HELPER ---
+        function downloadImage(url, filename) {
+            // Use server-side endpoint that forces Content-Disposition: attachment
+            const downloadUrl = '<?php echo site_url("forum/download_image/"); ?>' + encodeURIComponent(filename);
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        let currentZoomFilename = 'download_image';
+
         function openImageZoom(imgSrc) {
             zoomedImage.src = imgSrc;
-            downloadZoomBtn.href = imgSrc;
-            const filename = imgSrc.substring(imgSrc.lastIndexOf('/') + 1) || 'download_image';
-            downloadZoomBtn.download = filename;
+            currentZoomFilename = imgSrc.substring(imgSrc.lastIndexOf('/') + 1) || 'download_image';
             imageZoomModal.style.setProperty('display', 'flex', 'important');
+        }
+
+        if (downloadZoomBtn) {
+            downloadZoomBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                downloadImage(zoomedImage.src, currentZoomFilename);
+            });
         }
 
         if (closeZoomBtn) {
@@ -667,6 +726,7 @@
             
             if (m.image) {
                 const imgSrc = '<?php echo base_url('forums_data/images/'); ?>' + m.image;
+
                 const img = document.createElement('img');
                 img.src = imgSrc;
                 img.style.maxWidth = '100%';
@@ -682,7 +742,24 @@
                     e.stopPropagation();
                     openImageZoom(imgSrc);
                 });
-                
+
+                // // Download button overlay (dinonaktifkan sementara)
+                // const imgWrap = document.createElement('div');
+                // imgWrap.className = 'bubble-img-wrap';
+                // imgWrap.style.marginBottom = m.message ? '8px' : '0';
+                // const dlBtn = document.createElement('button');
+                // dlBtn.className = 'img-download-btn';
+                // dlBtn.title = 'Unduh Gambar';
+                // dlBtn.innerHTML = '<i class="fa-solid fa-download"></i>';
+                // dlBtn.addEventListener('click', (e) => {
+                //     e.preventDefault();
+                //     e.stopPropagation();
+                //     downloadImage(imgSrc, m.image || 'download_image');
+                // });
+                // imgWrap.appendChild(img);
+                // imgWrap.appendChild(dlBtn);
+                // bubble.appendChild(imgWrap);
+
                 bubble.appendChild(img);
             }
 
@@ -767,7 +844,7 @@
             filteredUsers.forEach((u, idx) => {
                 const div = document.createElement('div');
                 div.className = 'mention-item' + (idx === 0 ? ' active' : '');
-                div.textContent = u.nama_lengkap;
+                div.textContent = u.name;
                 div.dataset.index = idx;
                 div.addEventListener('click', () => {
                     insertMention(idx);

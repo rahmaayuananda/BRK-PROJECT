@@ -331,10 +331,10 @@
             <section class="content">
                 <div class="topic-list">
                     <?php
-                    $current_nip = $this->session->userdata('nip') ?? '';
+                    $current_nip = $this->session->userdata('username') ?? '';
                     $current_username = $this->session->userdata('username') ?? '';
                     $current_id = $this->session->userdata('id_users') ?? '';
-                    $current_fullname = $this->session->userdata('nama_lengkap') ?? $this->session->userdata('fullname') ?? '';
+                    $current_fullname = $this->session->userdata('name') ?? $this->session->userdata('fullname') ?? '';
                     ?>
                     <?php if (!empty($topics) && is_array($topics)): ?>
                         <?php foreach ($topics as $t): ?>
@@ -459,7 +459,7 @@
                         const stat = document.createElement('div'); stat.className = 'stat'; const total = t.total_messages ? t.total_messages : 0; stat.innerHTML = `<svg viewBox="0 0 24 24" fill="none"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"stroke="#6b7280" stroke-width="1.2"/></svg><span>${total}</span>`;
                         stats.appendChild(stat);
 
-                        const currentUsername = <?php echo json_encode($this->session->userdata('nip') ?? $this->session->userdata('username') ?? $this->session->userdata('id_users') ?? ''); ?>;
+                        const currentUsername = <?php echo json_encode($this->session->userdata('username') ?? $this->session->userdata('id_users') ?? ''); ?>;
                         if (t.created_by === currentUsername) {
                             const delWrap = document.createElement('div');
                             delWrap.style.marginTop = '6px';

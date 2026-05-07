@@ -19,7 +19,7 @@ class Forum extends CI_Controller
             return;
         }
 
-        $username = $this->session->userdata('nip'); // ✅ pakai nip
+        $username = $this->session->userdata('username'); // ✅ pakai username
 
         // $data['topics'] = $this->forum_model->get_user_topics_with_count($username);
         $data['topics'] = $this->forum_model->get_topics();
@@ -69,7 +69,7 @@ class Forum extends CI_Controller
         $users = $this->forum_model->get_all_users();
         // Format names to use underscores for mention tags
         $formatted_users = array_map(function($u) {
-            $u['mention_tag'] = str_replace(' ', '_', $u['nama_lengkap']);
+            $u['mention_tag'] = str_replace(' ', '_', $u['name']);
             return $u;
         }, $users);
         $this->output->set_content_type('application/json')->set_output(json_encode($formatted_users));
@@ -78,8 +78,11 @@ class Forum extends CI_Controller
     // API: get user topics as JSON
     public function user_topics()
     {
-        $username = $this->session->userdata('nama_lengkap') ?: $this->session->userdata('nip');
-        $topics = $this->forum_model->get_topics_by_creator($username);
+        $identities = array_filter([
+            $this->session->userdata('name'),
+            $this->session->userdata('username')
+        ]);
+        $topics = $this->forum_model->get_topics_by_creator($identities);
         $this->output->set_content_type('application/json')->set_output(json_encode($topics));
     }
 
@@ -96,10 +99,10 @@ class Forum extends CI_Controller
             $this->output->set_status_header(400)->set_content_type('application/json')->set_output(json_encode(['error' => 'Judul kosong']));
             return;
         }
-        $fullname = $this->session->userdata('nama_lengkap');
+        $fullname = $this->session->userdata('name');
 
         if (!$fullname) {
-            $fullname = $this->session->userdata('nip');
+            $fullname = $this->session->userdata('username');
         }
 
         if (!$fullname) {
@@ -196,8 +199,8 @@ class Forum extends CI_Controller
         }
 
         // ✅ ambil user
-        $username = $this->session->userdata('nip');
-        $fullname = $this->session->userdata('nama_lengkap') ?: $username;
+        $username = $this->session->userdata('username');
+        $fullname = $this->session->userdata('name') ?: $username;
 
         // ✅ ambil avatar
         $avatar = null;
@@ -233,10 +236,10 @@ class Forum extends CI_Controller
             
             foreach ($mentioned_tags as $tag) {
                 foreach ($all_users as $u) {
-                    $u_tag = str_replace(' ', '_', $u['nama_lengkap']);
+                    $u_tag = str_replace(' ', '_', $u['name']);
                     if (strtolower($tag) === strtolower($u_tag)) {
                         // Jangan mention diri sendiri
-                        if ($u['nip'] !== $username) {
+                        if ($u['username'] !== $username) {
                             // Simpan notifikasi ke Activity_Log
                             if (isset($this->db) && $this->db->table_exists('Activity_Log')) {
                                 $this->db->insert('Activity_Log', [
@@ -280,10 +283,12 @@ class Forum extends CI_Controller
             return;
         }
 
-        $username = $this->session->userdata('nama_lengkap')
-            ?: $this->session->userdata('nip');
+        $identities = array_filter([
+            $this->session->userdata('name'),
+            $this->session->userdata('username')
+        ]);
 
-        $topics = $this->forum_model->get_topics_by_creator($username);
+        $topics = $this->forum_model->get_topics_by_creator($identities);
 
         $data['topics'] = $topics;
 
@@ -297,8 +302,8 @@ class Forum extends CI_Controller
             return;
         }
 
-        $username = $this->session->userdata('nip');
-        $fullname = $this->session->userdata('nama_lengkap') ?: $username;
+        $username = $this->session->userdata('username');
+        $fullname = $this->session->userdata('name') ?: $username;
 
         $topics = $this->forum_model->get_user_topics($username);
 
@@ -387,8 +392,8 @@ class Forum extends CI_Controller
         }
 
         // 🔥 ambil session
-        $username = $this->session->userdata('nip');
-        $fullname = $this->session->userdata('nama_lengkap');
+        $username = $this->session->userdata('username');
+        $fullname = $this->session->userdata('name');
         $role = $this->session->userdata('role');
 
         // 🔥 NORMALISASI (hindari mismatch)
@@ -565,5 +570,50 @@ class Forum extends CI_Controller
         $success = $this->forum_model->set_faq($id);
 
         echo json_encode(['success' => $success]);
+    }
+
+    /**
+     * Force-download an image from forums_data/images/
+     * URL: forum/download_image/<filename>
+     */
+    public function download_image($filename = null)
+    {
+        if (!$this->session->userdata('logged_in')) {
+            show_404();
+            return;
+        }
+
+        if (!$filename) {
+            show_404();
+            return;
+        }
+
+        // Sanitize filename to prevent directory traversal
+        $filename = basename($filename);
+        $filepath = FCPATH . 'forums_data/images/' . $filename;
+
+        if (!file_exists($filepath)) {
+            show_404();
+            return;
+        }
+
+        // Detect MIME type
+        $mime = mime_content_type($filepath);
+        if (strpos($mime, 'image') === false) {
+            show_404();
+            return;
+        }
+
+        // Force download headers
+        header('Content-Description: File Transfer');
+        header('Content-Type: ' . $mime);
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Content-Transfer-Encoding: binary');
+        header('Content-Length: ' . filesize($filepath));
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        ob_end_clean();
+        readfile($filepath);
+        exit;
     }
 }

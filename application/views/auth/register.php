@@ -78,8 +78,8 @@
             </div>
 
             <div class="form-field">
-                <label for="nip">NIP</label>
-                <input id="nip" name="nip" type="text" placeholder="NIP (akan menjadi username)">
+                <label for="username">Username</label>
+                <input id="username" name="username" type="text" placeholder="Username">
             </div>
 
             <div class="form-field">

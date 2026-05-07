@@ -1,10 +1,10 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 <?php
-// Session mappings to support DB fields: nip, nama_lengkap, id_users
-$session_nip = $this->session->userdata('nip') ?? $this->session->userdata('username') ?? '';
+// Session mappings to support DB fields: username, name, id_users
+$session_nip = $this->session->userdata('username') ?? '';
 $session_username = $this->session->userdata('username') ?? '';
 $session_id = $this->session->userdata('id_users') ?? '';
-$session_fullname = $this->session->userdata('nama_lengkap') ?? $this->session->userdata('fullname') ?? ($session_username ?: 'User');
+$session_fullname = $this->session->userdata('name') ?? $this->session->userdata('fullname') ?? ($session_username ?: 'User');
 $avatar = $this->session->userdata('avatar_url') ? $this->session->userdata('avatar_url') : null;
 $exts = array('png', 'jpg', 'jpeg', 'gif', 'webp');
 if (!$avatar) {
@@ -83,8 +83,8 @@ $subtitle = isset($subtitle) ? $subtitle : '';
         window.__NOTIF_INITED = true;
 
         var __LOGGED_IN = <?php echo json_encode((bool) ($this->session && $this->session->userdata('logged_in'))); ?>;
-        var __USERNAME = <?php echo json_encode($this->session->userdata('nip') ?? $this->session->userdata('username') ?? ''); ?>;
-        var __FULLNAME = <?php echo json_encode($this->session->userdata('nama_lengkap') ?? $this->session->userdata('fullname') ?? ''); ?>;
+        var __USERNAME = <?php echo json_encode($this->session->userdata('username') ?? ''); ?>;
+        var __FULLNAME = <?php echo json_encode($this->session->userdata('name') ?? $this->session->userdata('fullname') ?? ''); ?>;
         window.__USER_JOINED_TOPICS = window.__USER_JOINED_TOPICS || new Set();
         window.__NOTIFS = window.__NOTIFS || [];
 

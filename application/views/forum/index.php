@@ -273,8 +273,8 @@
             <section class="content">
                 <div class="topic-list">
                     <?php
-                    $current_fullname = $this->session->userdata('nama_lengkap') ?? $this->session->userdata('fullname') ?? '';
-                    $current_user = $this->session->userdata('nip') ?? '';
+                    $current_fullname = $this->session->userdata('name') ?? $this->session->userdata('fullname') ?? '';
+                    $current_user = $this->session->userdata('username') ?? '';
                     $current_role = $this->session->userdata('role') ?? '';
                     ?>
                     <?php foreach ($topics as $t): ?>
@@ -371,12 +371,12 @@
 
     <script>
         const currentRole = <?php echo json_encode($this->session->userdata('role') ?? ''); ?>;
-        const currentUser = <?php echo json_encode($this->session->userdata('nip') ?? ''); ?>;
+        const currentUser = <?php echo json_encode($this->session->userdata('username') ?? ''); ?>;
 
         async function refreshTopics() {
             try {
                 const currentUser = <?php echo json_encode(
-                    $this->session->userdata('nama_lengkap') ?? ''
+                    $this->session->userdata('name') ?? ''
                 ); ?>;
 
                 const res = await fetch('<?php echo site_url('forum/topics'); ?>');
@@ -484,8 +484,8 @@
         // Realtime via WebSocket (fallback to polling) — notifications handled centrally in header
         (function () {
             var __LOGGED_IN = <?php echo json_encode((bool) ($this->session && $this->session->userdata('logged_in'))); ?>;
-            var __USERNAME = <?php echo json_encode($this->session->userdata('nip') ?? $this->session->userdata('username') ?? ''); ?>;
-            var __FULLNAME = <?php echo json_encode($this->session->userdata('nama_lengkap') ?? $this->session->userdata('fullname') ?? ''); ?>;
+            var __USERNAME = <?php echo json_encode($this->session->userdata('username') ?? ''); ?>;
+            var __FULLNAME = <?php echo json_encode($this->session->userdata('name') ?? $this->session->userdata('fullname') ?? ''); ?>;
             window.__USER_JOINED_TOPICS = window.__USER_JOINED_TOPICS || new Set();
             window.__NOTIFS = window.__NOTIFS || [];
 

@@ -52,7 +52,7 @@ class Auth extends CI_Controller
         // cek ke database
         if ($this->db && $this->db->table_exists('users')) {
 
-            $q = $this->db->get_where('users', ['nip' => $username]);
+            $q = $this->db->get_where('users', ['username' => $username]);
 
             if ($q->num_rows() > 0) {
                 $row = $q->row_array();
@@ -60,16 +60,16 @@ class Auth extends CI_Controller
                 // cek password (support hash & plain)
                 if (password_verify($password, $row['password']) || $row['password'] === $password) {
 
-                    $fullname = $row['nama_lengkap'] ?? $username;
+                    $fullname = $row['name'] ?? $username;
 
                     // 🔥 ambil avatar langsung saat login
                     $avatar = null;
                     $exts = ['png', 'jpg', 'jpeg', 'gif', 'webp'];
 
                     foreach ($exts as $e) {
-                        $path = FCPATH . 'assets/avatars/' . $row['nip'] . '.' . $e;
+                        $path = FCPATH . 'assets/avatars/' . $row['username'] . '.' . $e;
                         if (file_exists($path)) {
-                            $avatar = base_url('assets/avatars/' . $row['nip'] . '.' . $e);
+                            $avatar = base_url('assets/avatars/' . $row['username'] . '.' . $e);
                             break;
                         }
                     }
@@ -81,9 +81,9 @@ class Auth extends CI_Controller
 
                     // ✅ set session lengkap
                     $this->session->set_userdata([
-                        'nip' => $row['nip'],
+                        'username' => $row['username'],
                         'id_users' => $row['id_users'] ?? null,
-                        'nama_lengkap' => $fullname,
+                        'name' => $fullname,
                         'avatar_url' => $avatar, // 🔥 FIX UTAMA ADA DI SINI
                         'role' => $row['role'], // ✅ TAMBAHAN PENTING
                         'logged_in' => true
@@ -122,7 +122,7 @@ class Auth extends CI_Controller
     public function register_submit()
     {
         $fullname = trim($this->input->post('fullname', true));
-        $nip = trim($this->input->post('nip', true));
+        $nip = trim($this->input->post('username', true));
         $password = $this->input->post('password', true);
         $repassword = $this->input->post('repassword', true);
 
@@ -144,17 +144,17 @@ class Auth extends CI_Controller
         if (isset($this->db) && $this->db) {
             try {
                 if ($this->db->table_exists('users')) {
-                    // check existing nip
-                    $q = $this->db->get_where('users', ['nip' => $nip]);
+                    // check existing username
+                    $q = $this->db->get_where('users', ['username' => $nip]);
                     if ($q->num_rows() > 0) {
-                        $this->session->set_flashdata('register_error', 'NIP sudah terdaftar');
+                        $this->session->set_flashdata('register_error', 'Username sudah terdaftar');
                         redirect('auth/register');
                         return;
                     }
 
                     $ins = [
-                        'nama_lengkap' => $fullname,
-                        'nip' => $nip,
+                        'name' => $fullname,
+                        'username' => $nip,
                         'password' => $hash
                     ];
                     if ($this->db->insert('users', $ins)) {
@@ -184,7 +184,7 @@ class Auth extends CI_Controller
         }
 
         if (isset($users[$nip])) {
-            $this->session->set_flashdata('register_error', 'NIP sudah terdaftar');
+            $this->session->set_flashdata('register_error', 'Username sudah terdaftar');
             redirect('auth/register');
             return;
         }
@@ -213,20 +213,20 @@ class Auth extends CI_Controller
             return;
         }
 
-        $username = $this->session->userdata('nip');
+        $username = $this->session->userdata('username');
 
         $data = [
             'username' => $username,
-            'fullname' => $this->session->userdata('nama_lengkap')
+            'fullname' => $this->session->userdata('name')
         ];
 
         // ambil dari DB
         if ($this->db && $this->db->table_exists('users')) {
-            $q = $this->db->get_where('users', ['nip' => $username]);
+            $q = $this->db->get_where('users', ['username' => $username]);
 
             if ($q->num_rows() > 0) {
                 $row = $q->row_array();
-                $data['fullname'] = $row['nama_lengkap'];
+                $data['fullname'] = $row['name'];
                 $data['email'] = $row['email'] ?? '';
             }
         }
@@ -255,7 +255,7 @@ class Auth extends CI_Controller
         if ($this->db && $this->db->table_exists('users')) {
             try {
                 if ($this->db->field_exists('bio', 'users')) {
-                    $q = $this->db->get_where('users', ['nip' => $username]);
+                    $q = $this->db->get_where('users', ['username' => $username]);
                     if ($q && $q->num_rows() > 0) {
                         $row = $q->row_array();
                         $data['bio'] = $row['bio'] ?? '';
@@ -345,7 +345,7 @@ class Auth extends CI_Controller
         }
 
         $ext = $allowed[$info['mime']];
-        $username = $this->session->userdata('nip');
+        $username = $this->session->userdata('username');
 
         $dir = FCPATH . 'assets/avatars/';
         if (!is_dir($dir)) {
@@ -393,7 +393,7 @@ class Auth extends CI_Controller
             return;
         }
 
-        $username = $this->session->userdata('nip');
+        $username = $this->session->userdata('username');
         $updated = false;
         $password_changed = false;
 
@@ -419,7 +419,7 @@ class Auth extends CI_Controller
                 if ($this->db->table_exists('users')) {
                     // if password change requested, verify current password first
                     if (!empty($new_password)) {
-                        $q = $this->db->get_where('users', ['nip' => $username]);
+                        $q = $this->db->get_where('users', ['username' => $username]);
                         if ($q && $q->num_rows() > 0) {
                             $row = $q->row_array();
                             $curpw = isset($row['password']) ? $row['password'] : null;
@@ -440,7 +440,7 @@ class Auth extends CI_Controller
                         }
                     }
 
-                    $upd = ['nama_lengkap' => $fullname];
+                    $upd = ['name' => $fullname];
                     if ($email !== '')
                         $upd['email'] = $email;
                     if ($password_changed)
@@ -454,9 +454,9 @@ class Auth extends CI_Controller
                     }
 
                     // ensure there's an existing DB row to update; if none, don't mark as updated so flatfile fallback runs
-                    $qexist = $this->db->get_where('users', ['nip' => $username]);
+                    $qexist = $this->db->get_where('users', ['username' => $username]);
                     if ($qexist && $qexist->num_rows() > 0) {
-                        $this->db->where('nip', $username);
+                        $this->db->where('username', $username);
                         $this->db->update('users', $upd);
                         $updated = ($this->db->affected_rows() > 0);
                     } else {
@@ -541,7 +541,7 @@ class Auth extends CI_Controller
 
         if ($updated || $avatar_uploaded || $password_changed) {
             // update session fullname
-            $this->session->set_userdata('nama_lengkap', $fullname);
+            $this->session->set_userdata('name', $fullname);
 
             // determine avatar URL if not already set by upload
             $avatar_url = $this->session->userdata('avatar_url');

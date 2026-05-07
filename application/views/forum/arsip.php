@@ -151,12 +151,63 @@
             display: flex;
             flex-direction: column;
         }
+
+        /* Notification unread styles (match dashboard) */
+        #notifDropdown .notif-item.notif-unread {
+            background: linear-gradient(90deg, rgba(13, 110, 253, 0.06), rgba(255, 255, 255, 0));
+            border-left: 4px solid #0d6efd;
+            padding-left: 12px;
+        }
+
+        #notifDropdown .unread-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #0d6efd;
+            border-radius: 999px;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        /* Scrollable notification list */
+        #notifDropdown {
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            max-width: 320px;
+        }
+
+        #notifDropdown .notif-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 6px 8px 6px;
+        }
+
+        #notifDropdown .notif-list {
+            max-height: 360px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 6px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #notifDropdown .notif-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #notifDropdown .notif-list::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 8px;
+        }
     </style>
 </head>
 
 <body>
     <div class="forum-app">
         <?php $this->load->view('layout/header', ['page_title' => 'Arsip']); ?>
+
+        <div id="globalAlert" style="display:none;max-width:1100px;margin:12px auto;padding:12px 14px;border-radius:6px;font-weight:600;text-align:center;box-shadow:0 6px 18px rgba(2,6,23,0.06)"></div>
 
         <main class="main">
             <?php $this->load->view('layout/sidebar'); ?>
@@ -251,6 +302,23 @@
             else card.style.display = 'none';
         });
     });
+
+    // show a global inline alert
+    function showGlobalAlert(msg, type) {
+        const el = document.getElementById('globalAlert');
+        if (!el) return;
+        el.textContent = msg || '';
+        if (type === 'error') {
+            el.style.color = '#dc2626';
+            el.style.background = '#fff1f2';
+        } else {
+            el.style.color = '#065f46';
+            el.style.background = '#ecfdf5';
+        }
+        el.style.display = 'block';
+        clearTimeout(window.__globalAlertTimeout);
+        window.__globalAlertTimeout = setTimeout(() => { try { el.style.display = 'none'; } catch (e) { } }, 3000);
+    }
 </script>
 
 </html>

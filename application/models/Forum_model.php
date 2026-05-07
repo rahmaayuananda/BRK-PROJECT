@@ -81,7 +81,7 @@ class Forum_model extends CI_Model
 
         // ✅ AMBIL USER SESSION DENGAN AMAN
         if (!$created_by) {
-            $created_by = $this->session->userdata('nip');
+            $created_by = $this->session->userdata('username');
             if (!$created_by) {
                 $created_by = 'Guest';
             }
@@ -565,11 +565,17 @@ class Forum_model extends CI_Model
         $topics = $this->get_topics();
         $result = [];
 
+        // Support matching against multiple identities (username, full name, etc.)
+        $identities = is_array($username) ? $username : [$username];
+        $identities = array_map(function($v) { return strtolower(trim($v ?? '')); }, $identities);
+        $identities = array_filter($identities, function($v) { return $v !== ''; });
+
+        if (empty($identities)) return [];
+
         foreach ($topics as $t) {
             $creator = strtolower(trim($t['created_by'] ?? ''));
-            $user = strtolower(trim($username));
 
-            if ($creator === $user) {
+            if (in_array($creator, $identities)) {
 
                 // hitung jumlah message
                 $messages = $this->get_messages($t['id']);
@@ -686,13 +692,13 @@ class Forum_model extends CI_Model
         $users = [];
         // Coba ambil dari DB table users
         if (isset($this->db) && $this->db && $this->db->table_exists('users')) {
-            $q = $this->db->select('id_users, nip, nama_lengkap')->get('users');
+            $q = $this->db->select('id_users, username, name')->get('users');
             if ($q && $q->num_rows() > 0) {
                 foreach ($q->result_array() as $row) {
                     $users[] = [
                         'id_users' => $row['id_users'],
-                        'nip' => $row['nip'],
-                        'nama_lengkap' => $row['nama_lengkap']
+                        'username' => $row['username'],
+                        'name' => $row['name']
                     ];
                 }
                 return $users;
@@ -705,10 +711,10 @@ class Forum_model extends CI_Model
             $json = @file_get_contents($users_file);
             $local = json_decode($json, true);
             if (is_array($local)) {
-                foreach ($local as $nip => $u) {
+                foreach ($local as $uname => $u) {
                     $users[] = [
-                        'nip' => $nip,
-                        'nama_lengkap' => $u['fullname'] ?? $nip
+                        'username' => $uname,
+                        'name' => $u['fullname'] ?? $uname
                     ];
                 }
             }

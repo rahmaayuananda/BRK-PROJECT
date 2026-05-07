@@ -80,5 +80,13 @@
         "created_at": 1778052297,
         "created_by": "Rahma Ayu Ananda",
         "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg"
+    },
+    {
+        "id": "69fbeb8ce712c",
+        "message": "logo 2",
+        "image": "b45145c4d96d5d054e855a23df1ed78a.png",
+        "created_at": 1778117516,
+        "created_by": "Rahma Ayu Ananda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg"
     }
 ]

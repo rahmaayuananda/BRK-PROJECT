@@ -251,7 +251,7 @@
     <div class="forum-app">
         <?php
         $fullnameHeader = $this->session && $this->session->userdata('logged_in')
-            ? ($this->session->userdata('nama_lengkap') ? $this->session->userdata('nama_lengkap') : $this->session->userdata('nip'))
+            ? ($this->session->userdata('name') ? $this->session->userdata('name') : $this->session->userdata('username'))
             : '';
         $this->load->view('layout/header', [
             'page_title' => 'Dashboard',
