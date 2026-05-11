@@ -10,8 +10,10 @@
     <link rel="stylesheet" href="<?php echo base_url('assets/css/forum.css'); ?>">
     <link rel="stylesheet" href="<?php echo base_url('assets/css/all.min.css'); ?>">
     <script>
-        const TOPIC_ID = '<?php echo $topic['id'] ?? ''; ?>';
-        const USER_ROLE = '<?php echo $this->session->userdata('role'); ?>';
+        const TOPIC_ID = <?php echo json_encode($topic['id'] ?? ''); ?>;
+        const USER_ROLE = <?php echo json_encode($this->session->userdata('role') ?? ''); ?>;
+        const CURRENT_USERNAME = <?php echo json_encode($this->session->userdata('username') ?? ''); ?>;
+        const CURRENT_FULLNAME = <?php echo json_encode($this->session->userdata('name') ?? $this->session->userdata('fullname') ?? ''); ?>;
         const IS_ARCHIVED = <?php echo (!empty($topic['archived']) ? 'true' : 'false'); ?>;
         const IS_FAQ = <?php echo (!empty($topic['is_faq']) ? 'true' : 'false'); ?>;
     </script>
@@ -199,6 +201,40 @@
             font-size: 11px;
             color: #9ca3af;
             margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .msg-delete {
+            padding: 4px 8px;
+            margin-left: 8px;
+            font-size: 12px;
+            color: #dc3545;
+            border: 1px solid #fca5a5;
+            background: #fff5f5;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+            flex-shrink: 0;
+        }
+
+        .msg-delete:hover {
+            background: #fecaca;
+            border-color: #dc2626;
+            color: #dc2626;
+        }
+
+        .msg-delete:active {
+            transform: scale(0.95);
+        }
+
+        .msg-delete i {
+            pointer-events: none;
         }
 
         /* ===== COMPOSER ===== */
@@ -543,6 +579,30 @@
             background: rgba(13, 110, 253, 0.85);
             box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
         }
+        /* Delete confirmation modal styling */
+        #deleteMsgModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            padding: 20px;
+        }
+
+        #deleteMsgModal .modal-box {
+            background: #fff;
+            padding: 18px;
+            border-radius: 12px;
+            max-width: 520px;
+            width: 100%;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+        }
+
+        #deleteMsgModal .modal-title { font-weight:700; margin-bottom:6px }
+        #deleteMsgModal .modal-sub { color:#6b7280; font-size:13px; margin-bottom:8px }
+        #deleteMsgModal .modal-msg { background:#f8fafc; padding:10px;border-radius:8px;color:#0f172a }
     </style>
 </head>
 
@@ -707,6 +767,8 @@
         function createMessageElement(m) {
             const wrap = document.createElement('div');
             wrap.className = 'message';
+            // attach message id for delegation
+            if (m.id) wrap.dataset.messageId = m.id;
 
             // ✅ AVATAR IMAGE
             const avatar = document.createElement('img');
@@ -769,48 +831,47 @@
                 bubble.innerHTML += msgHtml;
             }
 
-            // Hapus tombol hanya untuk pesan //
+            // Hapus tombol hanya untuk pesan (tampilkan hanya untuk pemilik atau admin)
             const meta = document.createElement('div');
             meta.className = 'msg-meta';
 
-            // tombol delete
-            const delBtn = document.createElement('button');
-            delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
-
-            delBtn.style.marginLeft = '10px';
-            delBtn.style.fontSize = '11px';
-            delBtn.style.color = '#dc3545';
-            delBtn.style.border = 'none';
-            delBtn.style.background = 'transparent';
-            delBtn.style.cursor = 'pointer';
-
-            // klik hapus
-            delBtn.addEventListener('click', () => {
-                openDeleteMessageModal(m.id, m.message);
-            });
-
-
-            // const ts = new Date(m.created_at * 1000);
-            // meta.textContent = ts.toLocaleDateString() + ' ' + ts.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            // waktu
             const ts = new Date(m.created_at * 1000);
-
             const day = String(ts.getDate()).padStart(2, '0');
             const month = String(ts.getMonth() + 1).padStart(2, '0');
             const year = ts.getFullYear();
 
             meta.innerHTML = `${day}/${month}/${year} ` +
                 ts.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            meta.appendChild(delBtn);
+
+            // tombol delete: hanya tambahkan jika user adalah admin atau pemilik pesan
+            try {
+                const ownerName = (m.created_by || '').toString().trim().toLowerCase();
+                const myName = (CURRENT_FULLNAME || '').toString().trim().toLowerCase();
+                const myUser = (CURRENT_USERNAME || '').toString().trim().toLowerCase();
+                const isOwner = ownerName && (ownerName === myName || ownerName === myUser);
+                const canDelete = (USER_ROLE === 'admin') || isOwner;
+
+                if (canDelete) {
+                    const delBtn = document.createElement('button');
+                    delBtn.className = 'msg-delete';
+                    delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+                    delBtn.dataset.messageId = m.id || '';
+                    delBtn.title = (USER_ROLE === 'admin') ? 'Hapus untuk semua' : 'Hapus untuk saya';
+                    delBtn.type = 'button';
+
+                    meta.appendChild(delBtn);
+                }
+            } catch (err) {
+                console.error('Delete button error', err);
+            }
+
             content.appendChild(name);
             content.appendChild(bubble);
             content.appendChild(meta);
 
             wrap.appendChild(avatar);
             wrap.appendChild(content);
-
-            delBtn.addEventListener('click', () => {
-                openDeleteMessageModal(m.id, m.message);
-            });
 
             return wrap;
         }
@@ -1061,9 +1122,13 @@
         setInterval(loadMessages, 2000);
         loadMessages();
 
-        // Join topic button
+        // Join topic button (opsional - hanya jika button join ada di halaman)
         (function () {
-            btn.addEventListener('click', async function () {
+            // cari button join - bisa dengan id "joinBtn" atau ambil dari header
+            let joinBtn = document.getElementById('joinBtn') || document.querySelector('[data-action="join-topic"]');
+            if (!joinBtn) return; // skip jika button tidak ditemukan
+
+            joinBtn.addEventListener('click', async function () {
                 try {
                     const res = await fetch('<?php echo site_url('forum/join_topic'); ?>', {
                         method: 'POST',
@@ -1080,8 +1145,8 @@
                     const data = await res.json();
                     if (data && data.success) {
                         showToast('Berhasil bergabung ke topik ini', 'success');
-                        btn.textContent = 'Bergabung ✓';
-                        btn.disabled = true;
+                        joinBtn.textContent = 'Bergabung ✓';
+                        joinBtn.disabled = true;
                         try {
                             if (window.__USER_JOINED_TOPICS) window.__USER_JOINED_TOPICS.add(String(TOPIC_ID));
                             if (typeof loadNotifications === 'function') loadNotifications();
@@ -1137,7 +1202,13 @@
         let deleteMessageId = null;
 
         function openDeleteMessageModal(id, message) {
+            console.log('openDeleteMessageModal', { id: id, message: message });
             deleteMessageId = id;
+
+            if (!deleteMessageId) {
+                showToast('Tidak dapat menghapus: id pesan tidak tersedia', 'error');
+                return;
+            }
 
             const modal = document.getElementById('deleteMsgModal');
             const text = document.getElementById('deleteMsgText');
@@ -1185,6 +1256,39 @@
         });
 
         // tombol hapus
+        // event delegation for delete buttons - attached to messages container
+        (function () {
+            const msgs = document.getElementById('messages');
+            if (!msgs) return;
+            msgs.addEventListener('click', function (e) {
+                try {
+                    // support clicking on button or icon inside
+                    let btn = e.target.closest('.msg-delete');
+                    if (!btn) {
+                        if (e.target.tagName === 'I' && e.target.closest('.msg-delete')) {
+                            btn = e.target.closest('.msg-delete');
+                        }
+                    }
+                    if (!btn) return;
+                    
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const msgWrapper = btn.closest('.message');
+                    if (!msgWrapper) return;
+                    
+                    const id = btn.dataset.messageId;
+                    const bubble = msgWrapper.querySelector('.bubble');
+                    const msgText = bubble ? bubble.innerText.trim().substring(0, 200) : 'Pesan';
+                    
+                    console.log('Delete button clicked', { id: id, msgText: msgText, target: e.target });
+                    if (id) {
+                        openDeleteMessageModal(id, msgText);
+                    }
+                } catch (err) { console.error('Delete click error:', err); }
+            }, true);
+        })();
+
         document.getElementById('confirmDeleteMsg').addEventListener('click', async function () {
             if (!deleteMessageId) return;
 
@@ -1193,6 +1297,7 @@
             btn.textContent = 'Menghapus...';
 
             try {
+                console.log('Confirm delete clicked, id=', deleteMessageId);
                 const res = await fetch('<?php echo site_url('forum/delete_message'); ?>', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

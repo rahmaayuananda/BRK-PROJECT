@@ -1,12 +1,5 @@
 [
     {
-        "id": "69dd994c2bf2a",
-        "message": "p",
-        "created_at": 1776130380,
-        "created_by": "Rahma Ayu Ananda",
-        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg"
-    },
-    {
         "id": "69de00c2d6f09",
         "message": "p",
         "created_at": 1776156866,
@@ -18,7 +11,8 @@
         "message": "p",
         "created_at": 1776736521,
         "created_by": "Rahma Ayu Ananda",
-        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg"
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg",
+        "deleted_by": "2"
     },
     {
         "id": "69e739b29e9d8",
@@ -79,13 +73,30 @@
         "image": null,
         "created_at": 1778052297,
         "created_by": "Rahma Ayu Ananda",
-        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg"
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg",
+        "deleted_by": "2"
     },
     {
         "id": "69fbeb8ce712c",
         "message": "logo 2",
         "image": "b45145c4d96d5d054e855a23df1ed78a.png",
         "created_at": 1778117516,
+        "created_by": "Rahma Ayu Ananda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg"
+    },
+    {
+        "id": "6a0147f268f0d",
+        "message": "@Rahma_Ayu_Ananda kirimkan ini",
+        "image": null,
+        "created_at": 1778468850,
+        "created_by": "aynda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301153.png"
+    },
+    {
+        "id": "6a015133d1d23",
+        "message": "",
+        "image": "32ae4c55183b13a514c02f29184c9294.jpg",
+        "created_at": 1778471219,
         "created_by": "Rahma Ayu Ananda",
         "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg"
     }
