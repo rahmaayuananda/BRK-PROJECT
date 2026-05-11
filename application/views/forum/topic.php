@@ -6,7 +6,9 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title><?php echo htmlentities($topic['title'] ?? ''); ?> - Forum</title>
 
-    <link rel="stylesheet" href="<?php echo base_url('assets/css/inter.css'); ?>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?php echo base_url('assets/css/forum.css'); ?>">
     <link rel="stylesheet" href="<?php echo base_url('assets/css/all.min.css'); ?>">
     <script>
@@ -850,7 +852,9 @@
                 const myName = (CURRENT_FULLNAME || '').toString().trim().toLowerCase();
                 const myUser = (CURRENT_USERNAME || '').toString().trim().toLowerCase();
                 const isOwner = ownerName && (ownerName === myName || ownerName === myUser);
-                const canDelete = (USER_ROLE === 'admin') || isOwner;
+                
+                // 🔥 ALLOW DELETE: Admin bisa hapus semua (permanen), User bisa hapus any message (hanya untuk view mereka)
+                const canDelete = true; // semua user bisa hapus pesan
 
                 if (canDelete) {
                     const delBtn = document.createElement('button');
@@ -1113,6 +1117,14 @@
                         }
 
                     } catch (e) { }
+                });
+
+                // Suppress error logging - fallback to polling
+                ws.addEventListener('error', function (ev) {
+                    // Silent fail - polling will handle it
+                });
+                ws.addEventListener('close', function (ev) {
+                    // Silent close - polling will handle it
                 });
 
             } catch (e) { }

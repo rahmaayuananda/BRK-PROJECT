@@ -317,15 +317,13 @@ $subtitle = isset($subtitle) ? $subtitle : '';
                     console.log('WS connected (notif)');
                 });
 
+                ws.addEventListener('error', function (e) {
+                    // Silent error - polling fallback will handle it
+                });
 
                 ws.addEventListener('message', function (ev) {
-                    console.log("RAW WS:", ev.data);
                     try {
                         var d = JSON.parse(ev.data);
-
-                        // 🔥 TAMBAHKAN DI SINI
-                        console.log("WS DATA:", d);
-                        console.log("NOTIFS:", window.__NOTIFS);
 
                         if (d.type === 'topic') {
                             if (typeof refreshTopics === 'function') refreshTopics();
@@ -370,15 +368,13 @@ $subtitle = isset($subtitle) ? $subtitle : '';
                         }
 
                     } catch (e) {
-                        console.error('WS parse error:', e);
+                        // Silent fail - polling fallback handles it
                     }
                 });
 
                 ws.addEventListener('close', function () {
-                    console.log('WS closed (notif)');
+                    // Silent close - polling fallback handles it
                 });
-
-                ws.addEventListener('close', function () { console.log('WS closed (notif)'); });
             } catch (e) { }
         }
 

@@ -5,7 +5,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Dashboard - Forum</title>
-    <link rel="stylesheet" href="<?php echo base_url('assets/css/inter.css'); ?>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?php echo base_url('assets/css/forum.css'); ?>">
 
     <style>
@@ -389,6 +391,7 @@
                 const wsUrl = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.hostname + ':8080';
                 try {
                     const ws = new WebSocket(wsUrl);
+                    ws.addEventListener('error', function (e) { /* Silent - polling fallback */ });
                     ws.addEventListener('message', function (ev) {
                         try {
                             const d = JSON.parse(ev.data);
