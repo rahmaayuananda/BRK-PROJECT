@@ -334,6 +334,19 @@ $subtitle = isset($subtitle) ? $subtitle : '';
                             handleIncomingWsMessage(d);
                         }
 
+                        // 🔥 MENTION NOTIFICATION - GLOBAL (tidak peduli topic join)
+                        else if (d.type === 'mention') {
+                            addNotification({
+                                type: 'mention',
+                                topic_id: d.data.topic_id,
+                                topic_title: d.data.topic_title,
+                                message: d.data.mentioned_by + ' menyebut Anda di: ' + d.data.topic_title,
+                                created_by: d.data.mentioned_by,
+                                created_at: Math.floor(new Date(d.data.created_at).getTime() / 1000),
+                                is_mention: true
+                            });
+                        }
+
                         // topic baru
                         else if (d.type === 'topic_created') {
                             addNotification({

@@ -10,6 +10,36 @@ class Forum extends CI_Controller
         $this->load->model('forum_model');
         $this->load->helper('url');
         $this->load->helper('security');
+        $this->load->database(); // 🔥 Load database library
+        
+        // 🔥 Ensure Activity_Log table exists dengan struktur yang tepat untuk mention notifications
+        $this->ensure_activity_log_table();
+    }
+    
+    /**
+     * Ensure Activity_Log table exists dengan struktur untuk mention notifications
+     */
+    private function ensure_activity_log_table()
+    {
+        try {
+            if ($this->db && !$this->db->table_exists('Activity_Log')) {
+                // Table belum ada, buat
+                $this->db->query("
+                    CREATE TABLE IF NOT EXISTS Activity_Log (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        user_id INT,
+                        action VARCHAR(100),
+                        target_id VARCHAR(255),
+                        description TEXT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        INDEX idx_user_id (user_id),
+                        INDEX idx_action (action)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+                ");
+            }
+        } catch (Exception $e) {
+            // Silent fail - Activity_Log opsional
+        }
     }
 
     public function index()
@@ -247,6 +277,19 @@ class Forum extends CI_Controller
                                     'action' => 'mention',
                                     'target_id' => $id, // topic_id
                                     'description' => "{$fullname} menyebut Anda di: {$topic_title}",
+                                    'created_at' => date('Y-m-d H:i:s')
+                                ]);
+                                
+                                // 🔥 Kirim mention event ke WebSocket untuk real-time notification
+                                $this->notify_ws('mention', [
+                                    'type' => 'mention',
+                                    'target_user_id' => $u['id_users'],
+                                    'target_username' => $u['username'],
+                                    'mentioned_by' => $fullname,
+                                    'mentioned_by_username' => $username,
+                                    'topic_id' => $id,
+                                    'topic_title' => $topic_title,
+                                    'message' => $entry['message'],
                                     'created_at' => date('Y-m-d H:i:s')
                                 ]);
                             }
