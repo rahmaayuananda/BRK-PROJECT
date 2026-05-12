@@ -1,9 +1,10 @@
 [
     {
-        "id": "payment-99dbf",
-        "title": "Payment",
-        "created_at": 1778551535,
-        "created_by": "Rahma Ayu Ananda"
+        "id": "planning-f19ba",
+        "title": "Planning",
+        "created_at": 1778569137,
+        "created_by": "Admin TSI",
+        "is_faq": 1
     },
     {
         "id": "membuat-database-2c1b9",

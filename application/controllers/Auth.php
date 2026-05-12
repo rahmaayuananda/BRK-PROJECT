@@ -93,7 +93,7 @@ class Auth extends CI_Controller
                     // � LOG ACTIVITY - LOGIN
                     $user_id = $row['id_users'] ?? null;
                     if ($user_id) {
-                        $description = "User '{$fullname}' berhasil login dari IP " . $this->input->ip_address();
+                        $description = "{$fullname} berhasil login dari IP " . $this->input->ip_address();
                         $this->activity_log->log_activity(
                             $user_id,
                             'LOGIN',

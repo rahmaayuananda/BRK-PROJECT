@@ -113,6 +113,53 @@
             flex: 1;
         }
 
+        /* Activity Card - New Design */
+        .activity-card {
+            border-left: 4px solid var(--accent);
+            background: #f8fafc;
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .activity-card:hover {
+            background: #f1f5f9;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .activity-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .activity-card-title {
+            font-weight: 700;
+            font-size: 14px;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .activity-card-user {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 6px;
+        }
+
+        .activity-card-description {
+            font-size: 13px;
+            color: #475569;
+            margin-bottom: 4px;
+        }
+
+        .activity-card-timestamp {
+            font-size: 12px;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
         /* Grid dashboard */
         .dashboard-grid {
             display: grid;
@@ -349,26 +396,24 @@
 
                     <?php if (!empty($recent_activity)): ?>
                         <div class="activity-list">
-                            <?php foreach ($recent_activity as $act): ?>
-                                <div class="activity" style="margin-bottom:12px;">
-                                    <img
-                                        src="<?php echo $act['avatar'] ?: 'https://ui-avatars.com/api/?name=' . rawurlencode($act['created_by'] ?? 'User'); ?>">
-
-                                    <div class="activity-content">
-                                        <a
-                                            href="<?php echo site_url('forum/topic/' . $act['topic_id']) . '?from=dashboard&return=' . urlencode(site_url('dashboard')); ?>">
-                                            <?php echo htmlentities($act['topic_title']); ?>
-                                        </a>
-
-                                        <div class="meta">
-                                            <?php echo htmlentities($act['created_by'] ?? 'Unknown'); ?>
-                                            <span class="activity-ts"
-                                                data-ts="<?php echo intval($act['created_at']); ?>"><?php echo date('d/m/Y H:i', $act['created_at']); ?></span>
+                            <?php foreach ($recent_activity as $act): 
+                                // Convert action to readable format
+                                $action_label = str_replace('_', ' ', $act['action'] ?? 'ACTIVITY');
+                                $action_label = ucwords(strtolower($action_label));
+                            ?>
+                                <div class="activity-card">
+                                    <div class="activity-card-header">
+                                        <div style="flex:1;">
+                                            <div class="activity-card-title"><?php echo htmlentities($action_label); ?></div>
+                                            <div class="activity-card-user"><?php echo htmlentities($act['created_by'] ?? 'Unknown'); ?></div>
                                         </div>
-
-                                        <div style="margin-top:4px;color:var(--muted);">
-                                            <?php echo htmlentities(mb_substr($act['message'], 0, 100)); ?>...
+                                        <div class="activity-card-timestamp">
+                                            <?php echo date('d M Y H:i:s', $act['created_at']); ?>
                                         </div>
+                                    </div>
+                                    
+                                    <div class="activity-card-description">
+                                        <?php echo htmlentities($act['message'] ?? ''); ?>
                                     </div>
                                 </div>
                             <?php endforeach; ?>

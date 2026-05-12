@@ -145,7 +145,7 @@ class Forum extends CI_Controller
         if ($topic !== false) {
             $user_id = $this->session->userdata('id_users');
             if ($user_id) {
-                $description = "User '{$fullname}' membuat topik baru dengan judul '{$title}'";
+                $description = "{$fullname} membuat topik baru dengan judul '{$title}'";
                 $this->activity_log->log_activity(
                     $user_id,
                     'CREATE_TOPIC',
@@ -480,6 +480,19 @@ class Forum extends CI_Controller
                 ->set_output(json_encode(['error' => 'Gagal menghapus topik']));
         }
 
+        // 📝 LOG ACTIVITY - DELETE TOPIC
+        $user_id = $this->session->userdata('id_users');
+        if ($user_id) {
+            $topic_title = $topic['title'] ?? 'Untitled';
+            $description = "{$fullname} menghapus topik {$topic_title}";
+            $this->activity_log->log_activity(
+                $user_id,
+                'DELETE_TOPIC',
+                $id,
+                $description
+            );
+        }
+
         $this->notify_ws('topic_deleted', ['topic_id' => $id]);
 
         return $this->output->set_content_type('application/json')
@@ -559,6 +572,9 @@ class Forum extends CI_Controller
                 ->set_output(json_encode(['error' => 'Missing id']));
         }
 
+        $topic = $this->forum_model->find_topic($id);
+        $topic_title = $topic['title'] ?? 'Untitled';
+
         $success = $this->forum_model->archive_topic($id);
 
         if (!$success) {
@@ -570,7 +586,7 @@ class Forum extends CI_Controller
         $user_id = $this->session->userdata('id_users');
         $fullname = $this->session->userdata('name') ?? $this->session->userdata('username');
         if ($user_id) {
-            $description = "User '{$fullname}' mengarsipkan topik dengan ID '{$id}'";
+            $description = "{$fullname} mengarsipkan topik {$topic_title}";
             $this->activity_log->log_activity(
                 $user_id,
                 'ARCHIVE_TOPIC',
@@ -621,7 +637,8 @@ class Forum extends CI_Controller
         $user_id = $this->session->userdata('id_users');
         $fullname = $this->session->userdata('name') ?? $this->session->userdata('username');
         if ($user_id) {
-            $description = "User '{$fullname}' menutup/mengarsipkan topik dengan ID '{$id}'";
+            $closed_topic_title = $closed_topic['title'] ?? 'Untitled';
+            $description = "{$fullname} menutup/mengarsipkan topik {$closed_topic_title}";
             $this->activity_log->log_activity(
                 $user_id,
                 'ARCHIVE_TOPIC',
@@ -652,6 +669,8 @@ class Forum extends CI_Controller
 
     public function set_faq($id)
     {
+        $topic = $this->forum_model->find_topic($id);
+        $topic_title = $topic['title'] ?? 'Untitled';
         $success = $this->forum_model->set_faq($id);
 
         // 📝 LOG ACTIVITY - MARK FAQ
@@ -660,7 +679,7 @@ class Forum extends CI_Controller
             $fullname = $this->session->userdata('name') ?? $this->session->userdata('username');
             $role = $this->session->userdata('role');
             if ($user_id) {
-                $description = "Admin '{$fullname}' menjadikan topik dengan ID '{$id}' sebagai FAQ";
+                $description = "{$fullname} menjadikan topik {$topic_title} sebagai FAQ";
                 $this->activity_log->log_activity(
                     $user_id,
                     'MARK_FAQ',

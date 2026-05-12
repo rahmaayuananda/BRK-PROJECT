@@ -81,7 +81,7 @@ class Activity_log extends CI_Model
     }
 
     /**
-     * Ambil activity log berdasarkan user_id
+     * Ambil activity log berdasarkan user_id (dengan info user dari tabel users)
      * 
      * @param int $user_id
      * @param int $limit
@@ -89,10 +89,11 @@ class Activity_log extends CI_Model
      */
     public function get_user_activities($user_id, $limit = 50)
     {
-        $this->db->select('*')
-                 ->from($this->table)
-                 ->where('user_id', $user_id)
-                 ->order_by('created_at', 'DESC')
+        $this->db->select('al.*, u.username, u.name')
+                 ->from($this->table . ' al')
+                 ->join('users u', 'al.user_id = u.id_users', 'left')
+                 ->where('al.user_id', $user_id)
+                 ->order_by('al.created_at', 'DESC')
                  ->limit($limit);
 
         $query = $this->db->get();
