@@ -9,6 +9,7 @@ class Auth extends CI_Controller
         parent::__construct();
 
         $this->load->model('forum_model');
+        $this->load->model('activity_log');
         $this->load->helper(array('url', 'form', 'security'));
         $this->load->library('session');
         // load database if available (will use at runtime with checks)
@@ -89,7 +90,19 @@ class Auth extends CI_Controller
                         'logged_in' => true
                     ]);
 
-                    // 🔥 SIMPAN NOTIF KE FILE (GLOBAL)
+                    // � LOG ACTIVITY - LOGIN
+                    $user_id = $row['id_users'] ?? null;
+                    if ($user_id) {
+                        $description = "User '{$fullname}' berhasil login dari IP " . $this->input->ip_address();
+                        $this->activity_log->log_activity(
+                            $user_id,
+                            'LOGIN',
+                            null,
+                            $description
+                        );
+                    }
+
+                    // �🔥 SIMPAN NOTIF KE FILE (GLOBAL)
                     $this->save_notification([
                         'type' => 'user_login',
                         'topic_id' => 'login', // 🔥 TAMBAHAN

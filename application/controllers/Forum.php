@@ -8,6 +8,7 @@ class Forum extends CI_Controller
     {
         parent::__construct();
         $this->load->model('forum_model');
+        $this->load->model('activity_log');
         $this->load->helper('url');
         $this->load->helper('security');
         $this->load->database(); // 🔥 Load database library
@@ -139,6 +140,21 @@ class Forum extends CI_Controller
             $fullname = 'Guest'; // fallback terakhir
         }
         $topic = $this->forum_model->add_topic($title, $fullname);
+        
+        // 📝 LOG ACTIVITY - CREATE TOPIC
+        if ($topic !== false) {
+            $user_id = $this->session->userdata('id_users');
+            if ($user_id) {
+                $description = "User '{$fullname}' membuat topik baru dengan judul '{$title}'";
+                $this->activity_log->log_activity(
+                    $user_id,
+                    'CREATE_TOPIC',
+                    $topic['id'],
+                    $description
+                );
+            }
+        }
+        
         // notify websocket server (best-effort, non-blocking)
         $this->notify_ws('topic', $topic);
         $this->output->set_content_type('application/json')->set_output(json_encode($topic));
@@ -550,6 +566,19 @@ class Forum extends CI_Controller
                 ->set_output(json_encode(['error' => 'Gagal arsipkan topik']));
         }
 
+        // 📝 LOG ACTIVITY - ARCHIVE TOPIC
+        $user_id = $this->session->userdata('id_users');
+        $fullname = $this->session->userdata('name') ?? $this->session->userdata('username');
+        if ($user_id) {
+            $description = "User '{$fullname}' mengarsipkan topik dengan ID '{$id}'";
+            $this->activity_log->log_activity(
+                $user_id,
+                'ARCHIVE_TOPIC',
+                $id,
+                $description
+            );
+        }
+
         return $this->output->set_content_type('application/json')
             ->set_output(json_encode(['success' => true]));
     }
@@ -588,6 +617,19 @@ class Forum extends CI_Controller
         // simpan kembali ke JSON
         file_put_contents(FCPATH . 'forums_data/topics.json', json_encode($topics, JSON_PRETTY_PRINT));
 
+        // 📝 LOG ACTIVITY - CLOSE/ARCHIVE TOPIC
+        $user_id = $this->session->userdata('id_users');
+        $fullname = $this->session->userdata('name') ?? $this->session->userdata('username');
+        if ($user_id) {
+            $description = "User '{$fullname}' menutup/mengarsipkan topik dengan ID '{$id}'";
+            $this->activity_log->log_activity(
+                $user_id,
+                'ARCHIVE_TOPIC',
+                $id,
+                $description
+            );
+        }
+
         echo json_encode(['success' => true]);
     }
     public function faq()
@@ -611,6 +653,22 @@ class Forum extends CI_Controller
     public function set_faq($id)
     {
         $success = $this->forum_model->set_faq($id);
+
+        // 📝 LOG ACTIVITY - MARK FAQ
+        if ($success) {
+            $user_id = $this->session->userdata('id_users');
+            $fullname = $this->session->userdata('name') ?? $this->session->userdata('username');
+            $role = $this->session->userdata('role');
+            if ($user_id) {
+                $description = "Admin '{$fullname}' menjadikan topik dengan ID '{$id}' sebagai FAQ";
+                $this->activity_log->log_activity(
+                    $user_id,
+                    'MARK_FAQ',
+                    $id,
+                    $description
+                );
+            }
+        }
 
         echo json_encode(['success' => $success]);
     }
