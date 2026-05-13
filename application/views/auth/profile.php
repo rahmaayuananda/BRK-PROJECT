@@ -174,6 +174,53 @@
             background: #eef2ff;
             transform: translateY(-2px);
         }
+
+        /* Activity Card - New Design */
+        .activity-card {
+            border-left: 4px solid var(--accent);
+            background: #f8fafc;
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .activity-card:hover {
+            background: #f1f5f9;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .activity-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .activity-card-title {
+            font-weight: 700;
+            font-size: 14px;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .activity-card-user {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 6px;
+        }
+
+        .activity-card-description {
+            font-size: 13px;
+            color: #475569;
+            margin-bottom: 4px;
+        }
+
+        .activity-card-timestamp {
+            font-size: 12px;
+            color: #94a3b8;
+            font-weight: 500;
+        }
     </style>
 </head>
 
@@ -269,7 +316,7 @@
                                     href="<?php echo site_url('forum/topic/' . $t['id'] . '?return=' . urlencode(current_url())); ?>">>
                                     <?php echo htmlentities($t['title']); ?>
                                 </a>
-                                <small style="color:#6b7280"> - <?php echo date('d/m/Y H:i', $t['created_at'] ?? 0); ?></small>
+                                <small style="color:#6b7280"> - <?php echo date('d/m/Y, h.i A', $t['created_at'] ?? 0); ?></small>
                             </li>
                         <?php endforeach; ?>
                     </ul>
@@ -282,26 +329,38 @@
             <div style="margin-top:18px">
                 <h3 style="margin:0 0 8px 0">Aktivitas Terakhir</h3>
 
-                <div class="activity-scroll">
+                <div class="activity-scroll" style="max-height:280px;">
                     <?php if (!empty($recent_activity) && is_array($recent_activity)): ?>
-                        <ul style="padding-left:18px;margin-top:8px">
-                            <?php foreach ($recent_activity as $a): ?>
-                                <li style="margin-bottom:8px">
-                                    <a
-                                        href="<?php echo site_url('forum/topic/' . $a['topic_id'] . '?return=' . urlencode(current_url())); ?>">
-                                        <?php echo htmlentities($a['topic_title']); ?>
-                                    </a>
-                                    <div class="activity-item" data-ts="<?php echo intval($a['created_at'] ?? 0); ?>">
-                                        <?php echo htmlentities(mb_strimwidth($a['message'] ?? '', 0, 140, '...')); ?>
-                                        <div class="activity-ts" style="color:#6b7280;font-size:12px;margin-top:4px">
-                                            <?php echo date('d/m/Y H:i', $a['created_at'] ?? 0); ?>
+                        <?php foreach ($recent_activity as $a): 
+                            $action_label = str_replace('_', ' ', $a['action'] ?? 'ACTIVITY');
+                            $action_label = ucwords(strtolower($action_label));
+                        ?>
+                            <div class="activity-card" style="margin-bottom:8px;">
+                                <div class="activity-card-header">
+                                    <div style="flex:1;">
+                                        <div class="activity-card-title"><?php echo htmlentities($action_label); ?></div>
+                                        <div class="activity-card-user">
+                                            <?php echo htmlentities($a['topic_title'] ?? 'Unknown'); ?>
                                         </div>
                                     </div>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
+                                    <div class="activity-card-timestamp">
+                                        <?php 
+                                            $date = date('d/m/Y', $a['created_at']);
+                                            $time = date('h.i A', $a['created_at']);
+                                            echo $date . ', ' . $time;
+                                        ?>
+                                    </div>
+                                </div>
+                                
+                                <div class="activity-card-description">
+                                    <a href="<?php echo site_url('forum/topic/' . $a['topic_id'] . '?return=' . urlencode(current_url())); ?>" style="color:#2563eb;text-decoration:none;font-weight:500;">
+                                        <?php echo htmlentities(mb_strimwidth($a['message'] ?? '', 0, 120, '...')); ?>
+                                    </a>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
                     <?php else: ?>
-                        <div style="color:#6b7280">Belum ada aktivitas.</div>
+                        <div style="color:#6b7280;padding:8px;text-align:center;">Belum ada aktivitas.</div>
                     <?php endif; ?>
                 </div>
 
