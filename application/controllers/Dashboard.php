@@ -10,6 +10,9 @@ class Dashboard extends CI_Controller
         $this->load->model('activity_log');
         $this->load->helper('url');
         $this->load->library('session');
+        
+        // Set timezone ke Asia/Jakarta (UTC+7)
+        date_default_timezone_set('Asia/Jakarta');
     }
 
     public function index()
@@ -36,6 +39,11 @@ class Dashboard extends CI_Controller
                     $topic_title = $topic['title'] ?? '';
                 }
 
+                // Clean description - remove IP address part for UI display
+                $description = $act['description'] ?? '';
+                // Remove "dari IP xxx" part for dashboard display
+                $description = preg_replace('/\s+dari\s+IP\s+[\d\.:a-f]+\)?$/', '', $description);
+                
                 // Map activity_log row to the format expected by vw_dashboard.php
                 $recent_activity[] = [
                     'action' => $act['action'] ?? '',
@@ -44,7 +52,7 @@ class Dashboard extends CI_Controller
                     'topic_id' => $topic_id ?? '',
                     'topic_title' => $topic_title,
                     'created_at' => strtotime($act['created_at']),
-                    'message' => mb_substr($act['description'] ?? '', 0, 200)
+                    'message' => mb_substr($description, 0, 200)
                 ];
             }
             $data['recent_activity'] = $recent_activity;

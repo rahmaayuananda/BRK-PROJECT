@@ -14,6 +14,9 @@ class Auth extends CI_Controller
         $this->load->library('session');
         // load database if available (will use at runtime with checks)
         $this->load->database();
+        
+        // Set timezone ke Asia/Jakarta (UTC+7)
+        date_default_timezone_set('Asia/Jakarta');
     }
 
     public function login()

@@ -408,7 +408,11 @@
                                             <div class="activity-card-user"><?php echo htmlentities($act['created_by'] ?? 'Unknown'); ?></div>
                                         </div>
                                         <div class="activity-card-timestamp">
-                                            <?php echo date('d M Y H:i:s', $act['created_at']); ?>
+                                            <?php 
+                                                $date = date('d/m/Y', $act['created_at']);
+                                                $time = date('h.i A', $act['created_at']);
+                                                echo $date . ', ' . $time;
+                                            ?>
                                         </div>
                                     </div>
                                     

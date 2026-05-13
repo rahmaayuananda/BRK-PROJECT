@@ -9,6 +9,10 @@ class Activity_log extends CI_Model
     {
         parent::__construct();
         $this->load->database();
+        
+        // Set timezone ke Asia/Jakarta (UTC+7)
+        date_default_timezone_set('Asia/Jakarta');
+        
         $this->ensure_table_exists();
     }
 
