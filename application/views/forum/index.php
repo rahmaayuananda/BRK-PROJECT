@@ -316,14 +316,14 @@
                                         <!-- TUTUP DISKUSI (admin & owner) -->
                                         <button class="topic-action close-btn"
                                             onclick="handleCloseTopic('<?php echo $t['id']; ?>')">
-                                            🔒 Tutup
+                                            🔒 Tutup Diskudi
                                         </button>
 
                                         <!-- FAQ (KHUSUS ADMIN SAJA) -->
                                         <?php if ($current_role === 'admin'): ?>
                                             <button type="button" class="topic-action faq-btn"
                                                 onclick="handleSetFAQ('<?php echo $t['id']; ?>')">
-                                                ⭐ FAQ
+                                                ⭐ Jadikan FAQ 
                                             </button>
                                         <?php endif; ?>
 
@@ -440,7 +440,7 @@
 
                         // CLOSE
                         const closeBtn = document.createElement('button');
-                        closeBtn.innerHTML = '🔒 Tutup';
+                        closeBtn.innerHTML = '🔒 Tutup Diskudi';
                         closeBtn.className = 'topic-action close-btn';
                         closeBtn.onclick = function (e) {
                             e.stopPropagation();
@@ -451,7 +451,7 @@
                         // FAQ → hanya admin
                         if (isAdmin) {
                             const faqBtn = document.createElement('button');
-                            faqBtn.innerHTML = '⭐ FAQ';
+                            faqBtn.innerHTML = '⭐ Jadikan FAQ';
                             faqBtn.className = 'topic-action faq-btn';
                             faqBtn.onclick = function (e) {
                                 e.stopPropagation();
