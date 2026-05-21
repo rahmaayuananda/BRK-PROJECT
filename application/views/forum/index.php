@@ -307,8 +307,8 @@
                                 <?php if ($current_role === 'admin' || $t['created_by'] == $current_user): ?>
                                     <div style="margin-top:6px; display:flex; gap:6px; flex-wrap:wrap;">
 
-                                        <!-- HAPUS (admin & owner) -->
-                                        <button class="topic-action delete-btn"
+                                        <!-- HAPUS (admin & owner) - HIDDEN -->
+                                        <button class="topic-action delete-btn" style="display: none;"
                                             onclick="openDeleteModal('<?php echo $t['id']; ?>', <?php echo json_encode($t['title'] ?? ''); ?>)">
                                             🗑️ Hapus
                                         </button>
@@ -316,7 +316,7 @@
                                         <!-- TUTUP DISKUSI (admin & owner) -->
                                         <button class="topic-action close-btn"
                                             onclick="handleCloseTopic('<?php echo $t['id']; ?>')">
-                                            🔒 Tutup Diskudi
+                                            🔒 Tutup Diskusi
                                         </button>
 
                                         <!-- FAQ (KHUSUS ADMIN SAJA) -->
@@ -428,10 +428,11 @@
                         actionWrap.style.gap = '6px';
                         actionWrap.style.flexWrap = 'wrap';
 
-                        // DELETE
+                        // DELETE - HIDDEN
                         const delBtn = document.createElement('button');
                         delBtn.innerHTML = '🗑️ Hapus';
                         delBtn.className = 'topic-action delete-btn';
+                        delBtn.style.display = 'none';
                         delBtn.onclick = function (e) {
                             e.stopPropagation();
                             openDeleteModal(t.id, t.title);
@@ -440,7 +441,7 @@
 
                         // CLOSE
                         const closeBtn = document.createElement('button');
-                        closeBtn.innerHTML = '🔒 Tutup Diskudi';
+                        closeBtn.innerHTML = '🔒 Tutup Diskusi';
                         closeBtn.className = 'topic-action close-btn';
                         closeBtn.onclick = function (e) {
                             e.stopPropagation();

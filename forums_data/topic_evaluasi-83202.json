@@ -1,1 +1,44 @@
-[]
+[
+    {
+        "id": "6a0ec5c0cf207",
+        "message": "@Rahma_Ayu_Ananda haii",
+        "image": null,
+        "created_at": 1779353024,
+        "created_by": "Lutfi",
+        "avatar": "https:\/\/ui-avatars.com\/api\/?name=Lutfi"
+    },
+    {
+        "id": "6a0ec89b84603",
+        "message": "@Rahma_Ayu_Ananda p",
+        "image": null,
+        "created_at": 1779353755,
+        "created_by": "Lutfi",
+        "avatar": "https:\/\/ui-avatars.com\/api\/?name=Lutfi"
+    },
+    {
+        "id": "6a0ec9ae6325c",
+        "message": "🔥🔥🔥",
+        "image": null,
+        "created_at": 1779354030,
+        "created_by": "Lutfi",
+        "avatar": "https:\/\/ui-avatars.com\/api\/?name=Lutfi"
+    },
+    {
+        "id": "6a0ec9aeee03a",
+        "message": "🔥🔥🔥",
+        "image": null,
+        "created_at": 1779354030,
+        "created_by": "Lutfi",
+        "avatar": "https:\/\/ui-avatars.com\/api\/?name=Lutfi",
+        "deleted_by": "6"
+    },
+    {
+        "id": "6a0ec9af80da9",
+        "message": "🔥🔥🔥",
+        "image": null,
+        "created_at": 1779354031,
+        "created_by": "Lutfi",
+        "avatar": "https:\/\/ui-avatars.com\/api\/?name=Lutfi",
+        "deleted_by": "6"
+    }
+]
