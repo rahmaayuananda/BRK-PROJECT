@@ -415,6 +415,40 @@
         </div>
     </div>
 
+    <!-- Confirm Close Topic Modal -->
+    <div id="confirmCloseModal"
+        style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;padding:20px;z-index:9999">
+        <div class="modal-box"
+            style="background:white;border-radius:10px;max-width:560px;width:100%;padding:18px;box-shadow:0 10px 30px rgba(2,6,23,0.2);">
+            <h3>Tutup Diskusi</h3>
+            <div id="confirmCloseMsg" class="modal-msg">
+                <div>Tutup diskusi: <strong id="closeTopicTitle"></strong>?</div>
+                <div id="closeCreator" class="modal-sub" style="margin-top:8px;margin-bottom:22px;color:#6b7280"></div>
+            </div>
+            <div class="actions" style="display:flex;gap:12px;justify-content:space-between;width:100%;">
+                <button type="button" id="cancelCloseBtn" class="btn">Batal</button>
+                <button type="button" id="confirmCloseBtn" class="btn danger">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Make FAQ Modal -->
+    <div id="confirmFAQModal"
+        style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;padding:20px;z-index:9999">
+        <div class="modal-box"
+            style="background:white;border-radius:10px;max-width:560px;width:100%;padding:18px;box-shadow:0 10px 30px rgba(2,6,23,0.2);">
+            <h3>Jadikan FAQ</h3>
+            <div id="confirmFAQMsg" class="modal-msg">
+                <div>Jadikan topik: <strong id="faqTopicTitle"></strong> sebagai FAQ?</div>
+                <div id="faqCreator" class="modal-sub" style="margin-top:8px;margin-bottom:22px;color:#6b7280"></div>
+            </div>
+            <div class="actions" style="display:flex;gap:12px;justify-content:space-between;width:100%;">
+                <button type="button" id="cancelFAQBtn" class="btn">Batal</button>
+                <button type="button" id="confirmFAQBtn" class="btn primary">Jadikan FAQ</button>
+            </div>
+        </div>
+    </div>
+
     <!-- New Discussion Modal -->
     <div id="newDiscussionModal"
         style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;padding:20px;z-index:9999">
@@ -476,7 +510,7 @@
 
                 cont.innerHTML = '';
                 for (const t of pageData) {
-                    const card = document.createElement('div'); card.className = 'topic-card'; card.setAttribute('data-id', t.id); card.setAttribute('data-title', t.title.toLowerCase()); card.setAttribute('data-href', '<?php echo site_url('forum/topic/'); ?>' + t.id + '?from=all_topics'); card.tabIndex = 0;
+                    const card = document.createElement('div'); card.className = 'topic-card'; card.setAttribute('data-id', t.id); card.setAttribute('data-title', t.title.toLowerCase()); card.setAttribute('data-creator', t.created_by || ''); card.setAttribute('data-href', '<?php echo site_url('forum/topic/'); ?>' + t.id + '?from=all_topics'); card.tabIndex = 0;
                     const avatar = document.createElement('div'); avatar.className = 'avatar'; avatar.textContent = (t.title || '')[0] ? t.title[0].toUpperCase() : '?';
                     const info = document.createElement('div'); info.className = 'info';
                     const a = document.createElement('a'); a.className = 'topic-title'; a.href = '<?php echo site_url('forum/topic/'); ?>' + t.id + '?from=all_topics'; a.textContent = t.title;
@@ -721,6 +755,22 @@
             if (confirmBtn) confirmBtn.addEventListener('click', performDelete);
             if (delModal) delModal.addEventListener('click', function (e) { if (e.target === delModal) delModal.style.display = 'none'; });
 
+            // close (archive) modal bindings
+            const closeModal = document.getElementById('confirmCloseModal');
+            const cancelClose = document.getElementById('cancelCloseBtn');
+            const confirmClose = document.getElementById('confirmCloseBtn');
+            if (cancelClose) cancelClose.addEventListener('click', function () { closeCloseModal(); showGlobalAlert('Tutup diskusi dibatalkan', 'error'); });
+            if (confirmClose) confirmClose.addEventListener('click', performClose);
+            if (closeModal) closeModal.addEventListener('click', function (e) { if (e.target === closeModal) closeModal.style.display = 'none'; });
+
+            // FAQ modal bindings
+            const faqModal = document.getElementById('confirmFAQModal');
+            const cancelFAQ = document.getElementById('cancelFAQBtn');
+            const confirmFAQ = document.getElementById('confirmFAQBtn');
+            if (cancelFAQ) cancelFAQ.addEventListener('click', function () { closeFAQModal(); showGlobalAlert('Jadikan FAQ dibatalkan', 'error'); });
+            if (confirmFAQ) confirmFAQ.addEventListener('click', performFAQ);
+            if (faqModal) faqModal.addEventListener('click', function (e) { if (e.target === faqModal) faqModal.style.display = 'none'; });
+
             // new discussion modal
             const newModal = document.getElementById('newDiscussionModal');
             const cancelNew = document.getElementById('cancelNewTopicBtn');
@@ -771,6 +821,98 @@
             } catch (e) {
                 showGlobalAlert('Gagal menghapus topik', 'error');
                 console.error(e);
+            }
+        }
+
+        // Modal-based close (archive) flow
+        function openCloseModal(id, title, creator) {
+            window.__closeTopicId = id;
+            const modal = document.getElementById('confirmCloseModal');
+            const titleEl = document.getElementById('closeTopicTitle');
+            const creatorEl = document.getElementById('closeCreator');
+            if (titleEl) titleEl.textContent = title || '';
+            if (creatorEl) creatorEl.textContent = creator ? ('Oleh: ' + creator) : '';
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeCloseModal() {
+            const modal = document.getElementById('confirmCloseModal');
+            if (modal) modal.style.display = 'none';
+            window.__closeTopicId = null;
+        }
+
+        async function performClose() {
+            const id = window.__closeTopicId;
+            if (!id) return;
+            const btn = document.getElementById('confirmCloseBtn');
+            if (btn) { btn.disabled = true; btn.style.opacity = '0.7'; btn.textContent = 'Menutup...'; }
+            try {
+                const res = await fetch('<?php echo site_url('forum/archive_topic/'); ?>' + id, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+                if (!res.ok) {
+                    let msg = 'Gagal menutup topik';
+                    try { const d = await res.json(); if (d && d.error) msg = d.error; } catch (e) { }
+                    showGlobalAlert(msg, 'error');
+                    return;
+                }
+                const data = await res.json();
+                if (data && data.success) {
+                    closeCloseModal();
+                    showGlobalAlert('Topik berhasil diarsipkan', 'success');
+                    await refreshTopics();
+                } else {
+                    showGlobalAlert(data.error || 'Gagal menutup topik', 'error');
+                }
+            } catch (e) {
+                showGlobalAlert('Gagal menutup topik', 'error');
+                console.error(e);
+            } finally {
+                if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.textContent = 'Tutup'; }
+            }
+        }
+
+        // Modal-based FAQ flow
+        function openFAQModal(id, title, creator) {
+            window.__faqTopicId = id;
+            const modal = document.getElementById('confirmFAQModal');
+            const titleEl = document.getElementById('faqTopicTitle');
+            const creatorEl = document.getElementById('faqCreator');
+            if (titleEl) titleEl.textContent = title || '';
+            if (creatorEl) creatorEl.textContent = creator ? ('Oleh: ' + creator) : '';
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeFAQModal() {
+            const modal = document.getElementById('confirmFAQModal');
+            if (modal) modal.style.display = 'none';
+            window.__faqTopicId = null;
+        }
+
+        async function performFAQ() {
+            const id = window.__faqTopicId;
+            if (!id) return;
+            const btn = document.getElementById('confirmFAQBtn');
+            if (btn) { btn.disabled = true; btn.style.opacity = '0.7'; btn.textContent = 'Memproses...'; }
+            try {
+                const res = await fetch('<?php echo site_url('forum/set_faq/'); ?>' + id, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+                if (!res.ok) {
+                    let msg = 'Gagal menjadikan FAQ';
+                    try { const d = await res.json(); if (d && d.error) msg = d.error; } catch (e) { }
+                    showGlobalAlert(msg, 'error');
+                    return;
+                }
+                const data = await res.json();
+                if (data && data.success) {
+                    closeFAQModal();
+                    showGlobalAlert('Topik berhasil dijadikan FAQ', 'success');
+                    await refreshTopics();
+                } else {
+                    showGlobalAlert(data.error || 'Gagal menjadikan FAQ', 'error');
+                }
+            } catch (e) {
+                showGlobalAlert('Gagal menjadikan FAQ', 'error');
+                console.error(e);
+            } finally {
+                if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.textContent = 'Jadikan FAQ'; }
             }
         }
 
@@ -851,49 +993,51 @@
 
         // =====================ARSIP TOPIK JS=====================
         function handleCloseTopic(id) {
-            if (!confirm('Tutup diskusi ini?')) return;
-
-            fetch('<?php echo site_url('forum/archive_topic/'); ?>' + id, {
-                method: 'POST'
-            })
-                .then(res => res.json())
-                .then(res => {
-                    if (res.success) {
-                        showGlobalAlert('Topik berhasil diarsipkan', 'success');
-                        refreshTopics();
-                    } else {
-                        showGlobalAlert(res.error || 'Gagal', 'error');
+            let title = '';
+            let creator = '';
+            try {
+                const el = document.querySelector('.topic-card[data-id="' + id + '"]');
+                if (el) {
+                    title = el.getAttribute('data-title') || '';
+                    creator = el.getAttribute('data-creator') || '';
+                    if (!creator) {
+                        try {
+                            const metaEl = el.querySelector('.meta');
+                            if (metaEl) {
+                                const txt = (metaEl.textContent || '').trim();
+                                const parts = txt.split('•');
+                                if (parts.length > 0) creator = parts[0].trim();
+                            }
+                        } catch (e) { }
                     }
-                })
-                .catch(() => {
-                    showGlobalAlert('Terjadi kesalahan', 'error');
-                });
+                }
+            } catch (e) { }
+            openCloseModal(id, title, creator);
         }
 
         // =====================FAQ TOPIK JS=====================
         function handleSetFAQ(id) {
-            console.log("FAQ CLICKED:", id); // 👈 tambah ini
-
-            if (!confirm('Jadikan topik ini sebagai FAQ?')) return;
-
-            fetch('<?php echo site_url('forum/set_faq/'); ?>' + id, {
-                method: 'POST'
-            })
-                .then(res => res.json())
-                .then(res => {
-                    console.log("RESPONSE:", res); // 👈 tambah ini
-
-                    if (res.success) {
-                        showGlobalAlert('Topik berhasil dijadikan FAQ', 'success');
-                        refreshTopics();
-                    } else {
-                        showGlobalAlert('Gagal menjadikan FAQ', 'error');
+            let title = '';
+            let creator = '';
+            try {
+                const el = document.querySelector('.topic-card[data-id="' + id + '"]');
+                if (el) {
+                    title = el.getAttribute('data-title') || '';
+                    creator = el.getAttribute('data-creator') || '';
+                    if (!creator) {
+                        // fallback: try to parse meta text (format: "Creator • dd/mm/yyyy ...")
+                        try {
+                            const metaEl = el.querySelector('.meta');
+                            if (metaEl) {
+                                const txt = (metaEl.textContent || '').trim();
+                                const parts = txt.split('•');
+                                if (parts.length > 0) creator = parts[0].trim();
+                            }
+                        } catch (e) { }
                     }
-                })
-                .catch(err => {
-                    console.error("ERROR:", err); // 👈 penting
-                    showGlobalAlert('Terjadi kesalahan', 'error');
-                });
+                }
+            } catch (e) { }
+            openFAQModal(id, title, creator);
         }
     </script>
 </body>

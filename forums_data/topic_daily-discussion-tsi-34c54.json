@@ -1,1 +1,74 @@
-[]
+[
+    {
+        "id": "6a0fcec219f9e",
+        "message": "Daily Discussion TSI merupakan ruang diskusi harian untuk berbagi informasi, update pekerjaan, kendala sistem, serta koordinasi antar tim agar komunikasi lebih efektif dan terarah.",
+        "image": null,
+        "created_at": 1779420866,
+        "created_by": "Admin TSI",
+        "avatar": "https:\/\/ui-avatars.com\/api\/?name=Admin%20TSI"
+    },
+    {
+        "id": "6a0fceee8802c",
+        "message": "Tempat diskusi harian tim TSI untuk berbagi update pekerjaan, kendala, dan informasi penting seputar sistem dan teknologi.",
+        "image": null,
+        "created_at": 1779420910,
+        "created_by": "Admin TSI",
+        "avatar": "https:\/\/ui-avatars.com\/api\/?name=Admin%20TSI"
+    },
+    {
+        "id": "6a0fcef8a0c92",
+        "message": "Daily Discussion TSI digunakan untuk koordinasi ringan antar tim agar pekerjaan lebih terarah dan komunikasi tetap lancar.",
+        "image": null,
+        "created_at": 1779420920,
+        "created_by": "Admin TSI",
+        "avatar": "https:\/\/ui-avatars.com\/api\/?name=Admin%20TSI"
+    },
+    {
+        "id": "6a0fcf06adcad",
+        "message": "Media komunikasi harian untuk mendukung kolaborasi, update project, dan sharing informasi antar anggota tim TSI.",
+        "image": null,
+        "created_at": 1779420934,
+        "created_by": "Admin TSI",
+        "avatar": "https:\/\/ui-avatars.com\/api\/?name=Admin%20TSI"
+    },
+    {
+        "id": "6a0fcf1bbc9c2",
+        "message": "Tempat berbagi progress, pengalaman, dan kendala kerja agar koordinasi tim menjadi lebih efektif dan produktif.",
+        "image": null,
+        "created_at": 1779420955,
+        "created_by": "Rahma Ayu Ananda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg"
+    },
+    {
+        "id": "6a0fcf25eb813",
+        "message": "Daily Discussion TSI menjadi wadah komunikasi cepat untuk mendukung aktivitas kerja dan kolaborasi digital tim.",
+        "image": null,
+        "created_at": 1779420965,
+        "created_by": "Rahma Ayu Ananda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg"
+    },
+    {
+        "id": "6a0fcf4092081",
+        "message": "Forum diskusi harian yang mendukung kerja sama tim melalui komunikasi aktif dan pertukaran informasi secara realtime.",
+        "image": null,
+        "created_at": 1779420992,
+        "created_by": "aynda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301153.png"
+    },
+    {
+        "id": "6a0fcf4e8cd79",
+        "message": "Ruang ngobrol kerja harian untuk membahas sistem, project, bug, maupun kebutuhan pengembangan teknologi internal.",
+        "image": null,
+        "created_at": 1779421006,
+        "created_by": "aynda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301153.png"
+    },
+    {
+        "id": "6a0fcfddd1ccc",
+        "message": "",
+        "image": "ee467372d58b19d4150cdc9e381a72bf.png",
+        "created_at": 1779421149,
+        "created_by": "Admin TSI",
+        "avatar": "https:\/\/ui-avatars.com\/api\/?name=Admin%20TSI"
+    }
+]

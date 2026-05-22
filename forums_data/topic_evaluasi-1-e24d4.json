@@ -1,1 +1,58 @@
-[]
+[
+    {
+        "id": "6a0fc7081a439",
+        "message": "Evaluasi dilakukan untuk menilai kinerja sistem, menemukan kendala, meningkatkan kualitas fitur, serta memastikan aplikasi forum diskusi berjalan optimal dan sesuai kebutuhan pengguna.",
+        "image": null,
+        "created_at": 1779418888,
+        "created_by": "Rahma Ayu Ananda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg"
+    },
+    {
+        "id": "6a0fc71d85285",
+        "message": "Proses evaluasi bertujuan untuk memperbaiki kekurangan sistem serta meningkatkan performa aplikasi secara berkala.",
+        "image": null,
+        "created_at": 1779418909,
+        "created_by": "Rahma Ayu Ananda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg"
+    },
+    {
+        "id": "6a0fc731b3188",
+        "message": "Evaluasi dilakukan secara berkala untuk menjaga stabilitas, keamanan, dan performa aplikasi forum internal.",
+        "image": null,
+        "created_at": 1779418929,
+        "created_by": "Rahma Ayu Ananda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg"
+    },
+    {
+        "id": "6a0fc75ba239a",
+        "message": "Evaluasi sistem dilakukan agar kualitas layanan aplikasi tetap optimal dan mendukung kolaborasi pengguna.",
+        "image": null,
+        "created_at": 1779418971,
+        "created_by": "Rahma Ayu Ananda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg"
+    },
+    {
+        "id": "6a0fc77881f00",
+        "message": "Hasil evaluasi menjadi dasar dalam pengembangan dan peningkatan fitur pada sistem forum diskusi internal.",
+        "image": null,
+        "created_at": 1779419000,
+        "created_by": "Rahma Ayu Ananda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg"
+    },
+    {
+        "id": "6a0fc80453786",
+        "message": "Evaluasi sistem dilakukan untuk mengetahui efektivitas fitur dan kenyamanan pengguna dalam menggunakan aplikasi forum diskusi.",
+        "image": null,
+        "created_at": 1779419140,
+        "created_by": "Rahma Ayu Ananda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg"
+    },
+    {
+        "id": "6a0fc816079ef",
+        "message": "",
+        "image": "73a67b38758864482f9155e19125ace9.png",
+        "created_at": 1779419158,
+        "created_by": "Rahma Ayu Ananda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg"
+    }
+]

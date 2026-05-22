@@ -1,1 +1,66 @@
-[]
+[
+    {
+        "id": "6a0fcd6278033",
+        "message": "Knowledge Sharing TSI bertujuan untuk mendukung pengembangan kemampuan teknis serta pertukaran informasi terkait teknologi dan sistem informasi.",
+        "image": null,
+        "created_at": 1779420514,
+        "created_by": "Admin TSI",
+        "avatar": "https:\/\/ui-avatars.com\/api\/?name=Admin%20TSI"
+    },
+    {
+        "id": "6a0fcd7d78d4c",
+        "message": "Sharing seputar pengembangan sistem, coding, troubleshooting, dan teknologi terbaru di lingkungan TSI.",
+        "image": null,
+        "created_at": 1779420541,
+        "created_by": "Admin TSI",
+        "avatar": "https:\/\/ui-avatars.com\/api\/?name=Admin%20TSI"
+    },
+    {
+        "id": "6a0fcd89c8a30",
+        "message": "Knowledge Sharing TSI bertujuan untuk mendukung pengembangan kemampuan teknis serta pertukaran informasi terkait teknologi dan sistem informasi.",
+        "image": null,
+        "created_at": 1779420553,
+        "created_by": "Admin TSI",
+        "avatar": "https:\/\/ui-avatars.com\/api\/?name=Admin%20TSI"
+    },
+    {
+        "id": "6a0fcd9392da4",
+        "message": "Kegiatan Knowledge Sharing TSI mendorong kolaborasi, komunikasi, dan budaya belajar bersama antar karyawan.",
+        "image": null,
+        "created_at": 1779420563,
+        "created_by": "Admin TSI",
+        "avatar": "https:\/\/ui-avatars.com\/api\/?name=Admin%20TSI"
+    },
+    {
+        "id": "6a0fcd9e8be4c",
+        "message": "Knowledge Sharing TSI menjadi sarana berbagi pengalaman proyek, solusi permasalahan sistem, dan pengembangan aplikasi internal.",
+        "image": null,
+        "created_at": 1779420574,
+        "created_by": "Admin TSI",
+        "avatar": "https:\/\/ui-avatars.com\/api\/?name=Admin%20TSI"
+    },
+    {
+        "id": "6a0fcda659608",
+        "message": "Melalui Knowledge Sharing, tim TSI dapat meningkatkan kompetensi dan mempercepat penyelesaian masalah teknologi.",
+        "image": null,
+        "created_at": 1779420582,
+        "created_by": "Admin TSI",
+        "avatar": "https:\/\/ui-avatars.com\/api\/?name=Admin%20TSI"
+    },
+    {
+        "id": "6a0fcdaf2b59f",
+        "message": "Knowledge Sharing TSI mendukung terciptanya lingkungan kerja yang inovatif, adaptif, dan berbasis kolaborasi digital.",
+        "image": null,
+        "created_at": 1779420591,
+        "created_by": "Admin TSI",
+        "avatar": "https:\/\/ui-avatars.com\/api\/?name=Admin%20TSI"
+    },
+    {
+        "id": "6a0fce5f33b70",
+        "message": "",
+        "image": "2e2820472899b925c0560d70dd1eb057.png",
+        "created_at": 1779420767,
+        "created_by": "Admin TSI",
+        "avatar": "https:\/\/ui-avatars.com\/api\/?name=Admin%20TSI"
+    }
+]

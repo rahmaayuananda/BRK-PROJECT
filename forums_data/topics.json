@@ -21,13 +21,15 @@
         "id": "knowledge-sharing-tsi-17e7e",
         "title": "Knowledge Sharing TSI",
         "created_at": 1779417668,
-        "created_by": "Admin TSI"
+        "created_by": "Admin TSI",
+        "is_faq": 1
     },
     {
         "id": "daily-discussion-tsi-34c54",
         "title": "Daily Discussion TSI",
         "created_at": 1779417631,
-        "created_by": "Admin TSI"
+        "created_by": "Admin TSI",
+        "is_faq": 1
     },
     {
         "id": "network-security-369f2",
@@ -45,7 +47,8 @@
         "id": "frontend-developer-8143d",
         "title": "Frontend Developer",
         "created_at": 1779417533,
-        "created_by": "Lutfi"
+        "created_by": "Lutfi",
+        "is_faq": 1
     },
     {
         "id": "kolaborasi-tim-tsi-496f5",
@@ -63,12 +66,6 @@
         "id": "testing-2aeaf",
         "title": "Testing",
         "created_at": 1779416717,
-        "created_by": "aynda"
-    },
-    {
-        "id": "payment-1-568b0",
-        "title": "Payment 1",
-        "created_at": 1779416708,
         "created_by": "aynda"
     },
     {
@@ -93,7 +90,8 @@
         "id": "evaluasi-1-e24d4",
         "title": "Evaluasi 1",
         "created_at": 1779354307,
-        "created_by": "Rahma Ayu Ananda"
+        "created_by": "Rahma Ayu Ananda",
+        "is_faq": 1
     },
     {
         "id": "evaluasi-d9bc7",
@@ -114,23 +112,5 @@
         "created_at": 1778041963,
         "created_by": "Admin TSI",
         "is_faq": 1
-    },
-    {
-        "id": "evaluasi-83202",
-        "title": "Evaluasi",
-        "created_at": 1778041385,
-        "created_by": "Admin TSI"
-    },
-    {
-        "id": "69c9e833a46ba",
-        "title": "development",
-        "created_at": 1774839859,
-        "created_by": "Rahma Ayu Ananda"
-    },
-    {
-        "id": "69c64c47d1319",
-        "title": "UI\/UX",
-        "created_at": 1774603335,
-        "created_by": "aynda"
     }
 ]

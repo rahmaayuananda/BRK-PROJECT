@@ -1,1 +1,106 @@
-[]
+[
+    {
+        "id": "6a0fd1901bbef",
+        "message": "Payment 1 digunakan sebagai ruang diskusi terkait proses pembayaran, monitoring transaksi, troubleshooting payment, serta koordinasi sistem pembayaran agar berjalan aman, cepat, dan stabil.",
+        "image": null,
+        "created_at": 1779421584,
+        "created_by": "Admin TSI",
+        "avatar": "https:\/\/ui-avatars.com\/api\/?name=Admin%20TSI"
+    },
+    {
+        "id": "6a0fd1cf15f08",
+        "message": "Payment 1 sedang mengalami kendala transaksi timeout, apakah ada yang sudah cek service API?",
+        "image": null,
+        "created_at": 1779421647,
+        "created_by": "aynda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301153.png"
+    },
+    {
+        "id": "6a0fd20f1759f",
+        "message": "Ada update maintenance payment malam ini? Mohon info estimasi downtime sistem.",
+        "image": null,
+        "created_at": 1779421711,
+        "created_by": "Rahma Ayu Ananda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg"
+    },
+    {
+        "id": "6a0fd235950be",
+        "message": "Transaksi payment sudah berhasil normal kembali setelah restart service.",
+        "image": null,
+        "created_at": 1779421749,
+        "created_by": "aynda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301153.png"
+    },
+    {
+        "id": "6a0fd268ee884",
+        "message": "Mohon pengecekan pada log payment, terdapat beberapa transaksi gagal sejak pagi.”",
+        "image": null,
+        "created_at": 1779421800,
+        "created_by": "Rahma Ayu Ananda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg"
+    },
+    {
+        "id": "6a0fd278572ac",
+        "message": "Ada perubahan endpoint payment terbaru dari vendor? Jika ada tolong share dokumentasinya.",
+        "image": null,
+        "created_at": 1779421816,
+        "created_by": "aynda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301153.png"
+    },
+    {
+        "id": "6a0fd2899ccdc",
+        "message": "Monitoring transaksi Payment 1 hari ini cukup stabil, namun response API sedikit lambat.",
+        "image": null,
+        "created_at": 1779421833,
+        "created_by": "Rahma Ayu Ananda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg"
+    },
+    {
+        "id": "6a0fd312ad19d",
+        "message": "Tim backend sudah melakukan pengecekan database payment dan saat ini masih aman.”",
+        "image": null,
+        "created_at": 1779421970,
+        "created_by": "Rahma Ayu Ananda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg"
+    },
+    {
+        "id": "6a0fd31cc6129",
+        "message": "Apakah notifikasi payment gagal sudah realtime di dashboard monitoring?",
+        "image": null,
+        "created_at": 1779421980,
+        "created_by": "aynda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301153.png"
+    },
+    {
+        "id": "6a0fd32d71aac",
+        "message": "Mohon bantuan pengecekan koneksi server Payment 1 karena beberapa request pending",
+        "image": null,
+        "created_at": 1779421997,
+        "created_by": "Rahma Ayu Ananda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg"
+    },
+    {
+        "id": "6a0fd637318cd",
+        "message": "@Rahma_Ayu_Ananda Hari ini ada deployment fitur baru pada sistem payment, mohon dilakukan monitoring bersama.",
+        "image": null,
+        "created_at": 1779422775,
+        "created_by": "aynda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301153.png"
+    },
+    {
+        "id": "6a0fd843c8c07",
+        "message": "@aynda baik",
+        "image": null,
+        "created_at": 1779423300,
+        "created_by": "Rahma Ayu Ananda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg"
+    },
+    {
+        "id": "6a0fdc28c1bad",
+        "message": "@Rahma_Ayu_Ananda hallow",
+        "image": null,
+        "created_at": 1779424296,
+        "created_by": "aynda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301153.png"
+    }
+]

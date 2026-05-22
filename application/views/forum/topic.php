@@ -648,7 +648,7 @@
                             <i class="fa-solid fa-plus"></i>
                         </button>
                         <div style="flex: 1; position: relative; display: flex;">
-                            <input type="text" id="message" style="flex: 1; width: 100%;" placeholder="Tulis pesan atau keterangan gambar (maks 50 karakter)..." <?php echo $is_readonly ? 'disabled' : ''; ?> autocomplete="off">
+                            <input type="text" id="message" style="flex: 1; width: 100%;" placeholder="Tulis pesan atau keterangan gambar (maks 200 karakter)..." maxlength="200" <?php echo $is_readonly ? 'disabled' : ''; ?> autocomplete="off">
                             <div id="mentionDropdown" class="mention-dropdown"></div>
                         </div>
                         <button id="sendBtn" class="btn primary" <?php echo $is_readonly ? 'disabled' : ''; ?>>
@@ -1062,12 +1062,14 @@
         }
 
         document.getElementById('sendBtn').addEventListener('click', async function () {
-            const msg = document.getElementById('message').value;
+            let msg = document.getElementById('message').value;
 
             if (!msg.trim() && !selectedFile) return;
 
-            if (msg.length > 50) {
-                alert('Keterangan dipotong ke 50 karakter');
+            if (msg.length > 200) {
+                alert('Keterangan dipotong ke 200 karakter');
+                msg = msg.substring(0, 200);
+                document.getElementById('message').value = msg;
             }
 
             const formData = new FormData();

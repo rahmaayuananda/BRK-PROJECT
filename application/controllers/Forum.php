@@ -23,20 +23,19 @@ class Forum extends CI_Controller
     private function ensure_activity_log_table()
     {
         try {
-            if ($this->db && !$this->db->table_exists('Activity_Log')) {
-                // Table belum ada, buat
-                $this->db->query("
-                    CREATE TABLE IF NOT EXISTS Activity_Log (
-                        id INT AUTO_INCREMENT PRIMARY KEY,
-                        user_id INT,
-                        action VARCHAR(100),
-                        target_id VARCHAR(255),
-                        description TEXT,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        INDEX idx_user_id (user_id),
-                        INDEX idx_action (action)
-                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-                ");
+            // Use consistent lowercase table name to match Activity_log model
+            if ($this->db && !$this->db->table_exists('activity_log')) {
+                $this->db->query("CREATE TABLE IF NOT EXISTS activity_log (
+                    id_log_activity INT(10) AUTO_INCREMENT PRIMARY KEY,
+                    user_id INT(10),
+                    action VARCHAR(50),
+                    target_id VARCHAR(100),
+                    description TEXT,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_user_id (user_id),
+                    INDEX idx_action (action),
+                    INDEX idx_created_at (created_at)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
             }
         } catch (Exception $e) {
             // Silent fail - Activity_Log opsional
@@ -98,9 +97,11 @@ class Forum extends CI_Controller
     public function get_users()
     {
         $users = $this->forum_model->get_all_users();
-        // Format names to use underscores for mention tags
+        // Ensure each user has a display name and mention_tag (fallback to username)
         $formatted_users = array_map(function($u) {
-            $u['mention_tag'] = str_replace(' ', '_', $u['name']);
+            $display = !empty($u['name']) ? $u['name'] : ($u['username'] ?? '');
+            $u['name'] = $display;
+            $u['mention_tag'] = !empty($display) ? str_replace(' ', '_', $display) : ($u['username'] ?? '');
             return $u;
         }, $users);
         $this->output->set_content_type('application/json')->set_output(json_encode($formatted_users));
@@ -236,8 +237,8 @@ class Forum extends CI_Controller
 
         if (!empty($message)) {
             $message = trim($message);
-            if (mb_strlen($message) > 50) {
-                $message = mb_substr($message, 0, 50);
+            if (mb_strlen($message) > 200) {
+                $message = mb_substr($message, 0, 200);
             }
             $message = $this->security->xss_clean($message);
         } else {
@@ -273,42 +274,53 @@ class Forum extends CI_Controller
             'created_at' => time()
         ];
 
-        // 🔥 Proses Mentions
+        // 🔥 Proses Mentions: cari tag @... dan beri notifikasi
         if (preg_match_all('/@([a-zA-Z0-9_]+)/', $message, $matches)) {
             $mentioned_tags = array_unique($matches[1]);
             $all_users = $this->forum_model->get_all_users();
             $topic_info = $this->forum_model->find_topic($id);
             $topic_title = $topic_info ? $topic_info['title'] : 'Topik Forum';
-            
+
             foreach ($mentioned_tags as $tag) {
                 foreach ($all_users as $u) {
-                    $u_tag = str_replace(' ', '_', $u['name']);
+                    $name_or_username = !empty($u['name']) ? $u['name'] : ($u['username'] ?? '');
+                    $u_tag = str_replace(' ', '_', $name_or_username);
                     if (strtolower($tag) === strtolower($u_tag)) {
                         // Jangan mention diri sendiri
-                        if ($u['username'] !== $username) {
-                            // Simpan notifikasi ke Activity_Log
-                            if (isset($this->db) && $this->db->table_exists('Activity_Log')) {
-                                $this->db->insert('Activity_Log', [
-                                    'user_id' => $u['id_users'] ?? 0,
-                                    'action' => 'mention',
-                                    'target_id' => $id, // topic_id
-                                    'description' => "{$fullname} menyebut Anda di: {$topic_title}",
-                                    'created_at' => date('Y-m-d H:i:s')
-                                ]);
-                                
-                                // 🔥 Kirim mention event ke WebSocket untuk real-time notification
-                                $this->notify_ws('mention', [
-                                    'type' => 'mention',
-                                    'target_user_id' => $u['id_users'],
-                                    'target_username' => $u['username'],
-                                    'mentioned_by' => $fullname,
-                                    'mentioned_by_username' => $username,
-                                    'topic_id' => $id,
-                                    'topic_title' => $topic_title,
-                                    'message' => $entry['message'],
-                                    'created_at' => date('Y-m-d H:i:s')
-                                ]);
+                        if (($u['username'] ?? '') !== $username) {
+                            // Simpan notifikasi menggunakan model activity_log (lebih konsisten)
+                            if (isset($this->activity_log) && method_exists($this->activity_log, 'log_activity')) {
+                                $this->activity_log->log_activity(
+                                    $u['id_users'] ?? 0,
+                                    'mention',
+                                    $id,
+                                    "{$fullname} menyebut Anda di: {$topic_title}"
+                                );
+                            } else {
+                                // fallback ke table activity_log jika model tidak tersedia
+                                if (isset($this->db) && $this->db->table_exists('activity_log')) {
+                                    $this->db->insert('activity_log', [
+                                        'user_id' => $u['id_users'] ?? 0,
+                                        'action' => 'mention',
+                                        'target_id' => $id,
+                                        'description' => "{$fullname} menyebut Anda di: {$topic_title}",
+                                        'created_at' => date('Y-m-d H:i:s')
+                                    ]);
+                                }
                             }
+
+                            // Kirim mention event ke WebSocket untuk real-time notification
+                            $this->notify_ws('mention', [
+                                'type' => 'mention',
+                                'target_user_id' => $u['id_users'] ?? null,
+                                'target_username' => $u['username'] ?? null,
+                                'mentioned_by' => $fullname,
+                                'mentioned_by_username' => $username,
+                                'topic_id' => $id,
+                                'topic_title' => $topic_title,
+                                'message' => $entry['message'],
+                                'created_at' => date('Y-m-d H:i:s')
+                            ]);
                         }
                         break;
                     }

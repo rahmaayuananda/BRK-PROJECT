@@ -1,1 +1,74 @@
-[]
+[
+    {
+        "id": "6a0fc6a066398",
+        "message": "Frontend berfokus pada tampilan dan interaksi pengguna dalam sistem. Mencakup UI\/UX, dashboard, notifikasi realtime, responsive design, serta integrasi fitur agar aplikasi mudah digunakan.",
+        "image": null,
+        "created_at": 1779418784,
+        "created_by": "Rahma Ayu Ananda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg"
+    },
+    {
+        "id": "6a0fc79231ed7",
+        "message": "",
+        "image": "9b1e7277d88cc131a7ba5edc6db2c198.png",
+        "created_at": 1779419026,
+        "created_by": "Rahma Ayu Ananda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301152.jpg"
+    },
+    {
+        "id": "6a0fcaa37c5ad",
+        "message": "Frontend Developer bertanggung jawab dalam merancang dan mengembangkan tampilan antarmuka aplikasi agar menarik, responsif, dan mudah digunakan pengguna.",
+        "image": null,
+        "created_at": 1779419811,
+        "created_by": "aynda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301153.png"
+    },
+    {
+        "id": "6a0fcaaf12158",
+        "message": "Tugas Frontend Developer meliputi pembuatan tampilan dashboard, halaman forum, notifikasi realtime, serta optimasi responsive design.",
+        "image": null,
+        "created_at": 1779419823,
+        "created_by": "aynda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301153.png"
+    },
+    {
+        "id": "6a0fcabe902b1",
+        "message": "Frontend Developer memastikan seluruh fitur pada sisi tampilan aplikasi dapat berjalan dengan baik di berbagai perangkat dan browser.",
+        "image": null,
+        "created_at": 1779419838,
+        "created_by": "aynda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301153.png"
+    },
+    {
+        "id": "6a0fcad26c997",
+        "message": "Frontend Developer bekerja sama dengan Backend Developer untuk menghubungkan tampilan aplikasi dengan data dan sistem server.",
+        "image": null,
+        "created_at": 1779419858,
+        "created_by": "aynda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301153.png"
+    },
+    {
+        "id": "6a0fcb11e5082",
+        "message": "Frontend Developer bertugas mengubah desain UI menjadi tampilan website yang interaktif dan responsif.",
+        "image": null,
+        "created_at": 1779419921,
+        "created_by": "aynda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301153.png"
+    },
+    {
+        "id": "6a0fcb1c545a6",
+        "message": "Frontend Developer memastikan pengguna dapat berinteraksi dengan sistem secara nyaman dan efisien.",
+        "image": null,
+        "created_at": 1779419932,
+        "created_by": "aynda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301153.png"
+    },
+    {
+        "id": "6a0fcb3066da9",
+        "message": "Frontend Developer berkolaborasi dengan tim backend untuk memastikan integrasi sistem berjalan dengan baik.",
+        "image": null,
+        "created_at": 1779419952,
+        "created_by": "aynda",
+        "avatar": "http:\/\/localhost\/brk-project\/assets\/avatars\/2255301153.png"
+    }
+]
