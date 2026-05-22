@@ -7,11 +7,12 @@ class Forum extends CI_Controller
     public function __construct()
     {
         parent::__construct();
+        // Load database first so models have DB available in their constructors
+        $this->load->database(); // 🔥 Load database library
         $this->load->model('forum_model');
         $this->load->model('activity_log');
         $this->load->helper('url');
         $this->load->helper('security');
-        $this->load->database(); // 🔥 Load database library
         
         // 🔥 Ensure Activity_Log table exists dengan struktur yang tepat untuk mention notifications
         $this->ensure_activity_log_table();
@@ -96,7 +97,38 @@ class Forum extends CI_Controller
     // API: get all users for mentions
     public function get_users()
     {
-        $users = $this->forum_model->get_all_users();
+        // 🔥 AGGRESSIVE: Disable ALL caching
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, private');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        header('Last-Modified: ' . gmdate('D, d M Y H:i:s T'));
+        header('ETag: ' . md5(time()));
+        
+        // HOTFIX: Fetch users directly from DB to avoid any model-level fallback
+        $users = [];
+        try {
+            if ($this->db && $this->db->table_exists('users')) {
+                $q = $this->db->query("SELECT id_users, username, name FROM users ORDER BY id_users ASC");
+                if ($q) {
+                    foreach ($q->result_array() as $row) {
+                        $users[] = [
+                            'id_users' => $row['id_users'] ?? null,
+                            'username' => $row['username'] ?? '',
+                            'name' => $row['name'] ?? ''
+                        ];
+                    }
+                }
+            }
+        } catch (Exception $e) {
+            // fallback to model if anything goes wrong
+            log_message('error', 'get_users hotfix DB query failed: ' . $e->getMessage());
+            $users = $this->forum_model->get_all_users();
+        }
+
+        // Log untuk debugging
+        log_message('debug', '🔍 get_users() (hotfix) returned ' . count($users) . ' users');
+        log_message('debug', '📊 Users data: ' . json_encode($users));
+        
         // Ensure each user has a display name and mention_tag (fallback to username)
         $formatted_users = array_map(function($u) {
             $display = !empty($u['name']) ? $u['name'] : ($u['username'] ?? '');
@@ -104,7 +136,57 @@ class Forum extends CI_Controller
             $u['mention_tag'] = !empty($display) ? str_replace(' ', '_', $display) : ($u['username'] ?? '');
             return $u;
         }, $users);
-        $this->output->set_content_type('application/json')->set_output(json_encode($formatted_users));
+        
+        log_message('debug', '✅ Formatted ' . count($formatted_users) . ' users for frontend');
+        
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($formatted_users, JSON_UNESCAPED_UNICODE));
+    }
+    
+    // DEBUG: View raw endpoint output
+    public function debug_get_users()
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, private');
+        
+        $info = [
+            'timestamp' => date('Y-m-d H:i:s'),
+            'db_connected' => $this->db ? 'YES' : 'NO'
+        ];
+        
+        // Try with model
+        try {
+            $info['model_result'] = $this->forum_model->get_all_users();
+            $info['model_count'] = count($info['model_result']);
+
+            // Reflection info to help debug which model file is loaded
+            $ref = new ReflectionClass($this->forum_model);
+            $info['model_class'] = $ref->getName();
+            $info['model_file'] = $ref->getFileName();
+            $info['model_file_mtime'] = file_exists($info['model_file']) ? date('c', filemtime($info['model_file'])) : null;
+            $info['model_methods'] = get_class_methods($this->forum_model);
+
+            // Also ask the model to self-report DB/file debug info
+            if (method_exists($this->forum_model, 'get_all_users_debug')) {
+                $info['model_debug'] = $this->forum_model->get_all_users_debug();
+            }
+        } catch (Exception $e) {
+            $info['model_result'] = null;
+            $info['model_count'] = 0;
+            $info['model_reflection_error'] = $e->getMessage();
+        }
+        
+        // Also try raw query
+        if ($this->db && $this->db->table_exists('users')) {
+            $raw_result = $this->db->query("SELECT * FROM users");
+            if ($raw_result) {
+                $info['raw_query_count'] = $raw_result->num_rows();
+                $info['raw_query_result'] = $raw_result->result_array();
+            }
+        }
+        
+        echo json_encode($info, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     }
 
     // API: get user topics as JSON

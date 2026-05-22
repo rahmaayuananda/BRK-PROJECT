@@ -890,13 +890,52 @@
         const mentionDropdown = document.getElementById('mentionDropdown');
         const msgInput = document.getElementById('message');
 
-        async function fetchUsers() {
+        async function fetchUsers(force = false) {
             try {
-                const res = await fetch('<?php echo site_url('forum/get_users'); ?>');
-                allUsers = await res.json();
-            } catch (e) { console.error('Failed to load users'); }
+                // Always bypass cache - every time @mentions is typed
+                const now = Date.now();
+                const url = '<?php echo site_url('forum/get_users'); ?>' + '?_=' + now + '&t=' + Math.random() + '&cb=' + Math.random();
+                
+                console.log('🔄 Fetching users from server...', url);
+                
+                const res = await fetch(url, {
+                    method: 'GET',
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                if (!res.ok) {
+                    console.error('❌ Failed to load users, status', res.status);
+                    return;
+                }
+                
+                const json = await res.json();
+                console.log('✅ Fresh users fetched from server:', json);
+                
+                // normalize mention_tag if backend didn't provide it
+                allUsers = (Array.isArray(json) ? json : []).map(u => {
+                    if (!u.mention_tag) {
+                        const display = u.name || u.username || '';
+                        u.mention_tag = display ? String(display).replace(/\s+/g, '_') : (u.username || '');
+                    }
+                    return u;
+                });
+                
+                console.log('✅ All users formatted for mention:', allUsers);
+                window.lastUsersFetch = now;
+            } catch (e) {
+                console.error('❌ Failed to load users', e);
+            }
         }
-        fetchUsers();
+        
+        // Initial load on page load
+        console.log('🚀 Initializing mention system...');
+        fetchUsers(true);
 
         function showMentionDropdown(query) {
             filteredUsers = allUsers.filter(u => u.mention_tag.toLowerCase().includes(query.toLowerCase()));
@@ -946,7 +985,7 @@
         }
 
         if (msgInput) {
-            msgInput.addEventListener('input', (e) => {
+            msgInput.addEventListener('input', async (e) => {
                 const text = msgInput.value;
                 const cursorPos = msgInput.selectionEnd;
                 
@@ -957,6 +996,11 @@
                 if (lastAtMatch) {
                     mentionActive = true;
                     mentionStartIndex = cursorPos - lastAtMatch[2].length - 1;
+                    
+                    // 🔥 ALWAYS refresh users when @ is typed (no caching)
+                    console.log('💬 @ detected, fetching fresh user list from server...');
+                    await fetchUsers(true);
+                    
                     showMentionDropdown(lastAtMatch[2]);
                 } else {
                     closeMentionDropdown();

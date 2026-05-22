@@ -690,22 +690,56 @@ class Forum_model extends CI_Model
     public function get_all_users()
     {
         $users = [];
-        // Coba ambil dari DB table users
-        if (isset($this->db) && $this->db && $this->db->table_exists('users')) {
-            $q = $this->db->select('id_users, username, name')->get('users');
-            if ($q && $q->num_rows() > 0) {
-                foreach ($q->result_array() as $row) {
-                    $users[] = [
-                        'id_users' => $row['id_users'],
-                        'username' => $row['username'],
-                        'name' => $row['name']
-                    ];
+        
+        // 🔥 ALWAYS try DB first with more robust checking
+        if (isset($this->db) && $this->db) {
+            try {
+                $table_exists = $this->db->table_exists('users');
+                log_message('debug', '✅ Users table exists check: ' . ($table_exists ? 'YES' : 'NO'));
+                
+                    if ($table_exists) {
+                    // 🔥 IMPORTANT: reset any leftover query-builder state (e.g. lingering limit/where)
+                    if (method_exists($this->db, 'reset_query')) {
+                        $this->db->reset_query();
+                    }
+
+                    // Use a raw SELECT to avoid any lingering Query Builder state
+                    $q = $this->db->query("SELECT id_users, username, name FROM users");
+
+                    if ($q) {
+                        $num_rows = $q->num_rows();
+                        log_message('debug', '✅ DB Query returned ' . $num_rows . ' rows from users table');
+
+                        if ($num_rows > 0) {
+                            foreach ($q->result_array() as $row) {
+                                $user_entry = [
+                                    'id_users' => $row['id_users'] ?? null,
+                                    'username' => $row['username'] ?? '',
+                                    'name' => $row['name'] ?? ''
+                                ];
+                                $users[] = $user_entry;
+                                log_message('debug', '  → User: ' . json_encode($user_entry));
+                            }
+                            log_message('debug', '✅ Total users to return: ' . count($users));
+                            return $users;
+                        } else {
+                            log_message('debug', '⚠️ DB query returned 0 rows');
+                        }
+                    } else {
+                        $err = $this->db->error();
+                        $msg = is_array($err) && isset($err['message']) ? $err['message'] : json_encode($err);
+                        log_message('debug', '❌ DB query failed: ' . $msg);
+                    }
                 }
-                return $users;
+            } catch (Exception $e) {
+                log_message('error', '❌ Database error in get_all_users: ' . $e->getMessage());
             }
+        } else {
+            log_message('debug', '⚠️ Database not connected');
         }
 
         // Fallback ke flatfile
+        log_message('debug', '📄 Falling back to JSON file...');
         $users_file = APPPATH . 'data/users.json';
         if (file_exists($users_file)) {
             $json = @file_get_contents($users_file);
@@ -717,8 +751,42 @@ class Forum_model extends CI_Model
                         'name' => $u['fullname'] ?? $uname
                     ];
                 }
+                log_message('debug', '✅ Returning ' . count($users) . ' users from JSON file');
+            }
+        } else {
+            log_message('debug', '❌ JSON file not found: ' . $users_file);
+        }
+        
+        return $users;
+    }
+
+    // Debug helper: return internal DB checks and raw rows
+    public function get_all_users_debug()
+    {
+        $debug = [];
+        $debug['db_available'] = isset($this->db) && $this->db ? 'YES' : 'NO';
+
+        if ($debug['db_available'] === 'YES') {
+            try {
+                $debug['table_exists'] = $this->db->table_exists('users') ? 'YES' : 'NO';
+                $q = $this->db->query("SELECT id_users, username, name FROM users");
+                if ($q) {
+                    $debug['q_count'] = $q->num_rows();
+                    $debug['q_rows'] = $q->result_array();
+                } else {
+                    $debug['db_error'] = $this->db->error();
+                }
+            } catch (Exception $e) {
+                $debug['exception'] = $e->getMessage();
             }
         }
-        return $users;
+
+        $users_file = APPPATH . 'data/users.json';
+        $debug['users_file_exists'] = file_exists($users_file);
+        if ($debug['users_file_exists']) {
+            $debug['users_file_raw'] = json_decode(@file_get_contents($users_file), true);
+        }
+
+        return $debug;
     }
 }
