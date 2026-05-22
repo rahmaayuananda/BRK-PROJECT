@@ -307,7 +307,7 @@
 
             <!-- User's topics -->
             <div style="margin-top:18px">
-                <h3 style="margin:0 0 8px 0">Topik Oleh <?php echo htmlentities($fullname); ?></h3>
+                <h3 style="margin:0 0 8px 0">Forum Oleh <?php echo htmlentities($fullname); ?></h3>
                 <?php if (!empty($user_topics) && is_array($user_topics)): ?>
                     <ul style="padding-left:18px;margin-top:8px">
                         <?php foreach ($user_topics as $t): ?>
@@ -321,7 +321,7 @@
                         <?php endforeach; ?>
                     </ul>
                 <?php else: ?>
-                    <div style="color:#6b7280">Belum membuat topik.</div>
+                    <div style="color:#6b7280">Belum membuat Forum.</div>
                 <?php endif; ?>
             </div>
 

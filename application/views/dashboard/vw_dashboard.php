@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Dashboard - Forum</title>
+    <title>Forum Diskusi TSI - Forum</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -321,7 +321,7 @@
                     <div class="card stat-card">
                         <div class="stat-icon" style="background: rgba(13, 110, 253, 0.1); color: #0d6efd;">📊</div>
                         <div>
-                            <div class="stat-title">Total Topik</div>
+                            <div class="stat-title">Total Forum</div>
                             <div class="stat-value"><?php echo intval($total_topics); ?></div>
                         </div>
                     </div>
@@ -346,9 +346,9 @@
                 <!-- Grid -->
                 <div class="dashboard-grid">
 
-                    <!-- Topik Terbaru -->
+                    <!-- Forum Terbaru -->
                     <div class="card">
-                        <div class="section-title">🆕 Topik Terbaru</div>
+                        <div class="section-title">🆕 Forum Terbaru</div>
 
                         <?php if (!empty($latest_topics)): ?>
                             <?php foreach ($latest_topics as $t): ?>
@@ -365,13 +365,13 @@
                                 </div>
                             <?php endforeach; ?>
                         <?php else: ?>
-                            <div class="meta">Belum ada topik.</div>
+                            <div class="meta">Belum ada Forum.</div>
                         <?php endif; ?>
                     </div>
 
-                    <!-- Topik Populer -->
+                    <!-- Forum Populer -->
                     <div class="card">
-                        <div class="section-title">🔥 Topik Populer</div>
+                        <div class="section-title">🔥 Forum Populer</div>
 
                         <?php if (!empty($popular_topics)): ?>
                             <?php foreach ($popular_topics as $t): ?>

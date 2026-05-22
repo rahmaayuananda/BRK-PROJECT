@@ -63,14 +63,14 @@ else {
 
             <li class="<?= $all_active ?>">
                 <a href="<?= site_url('forum'); ?>">
-                    <span class="icon">💬</span> All Topic
+                    <span class="icon">💬</span> All Forum
                 </a>
             </li>
 
             <?php if ($this->session->userdata('role') === 'user'): ?>
                 <li class="<?= $my_active ?>">
                     <a href="<?= site_url('forum/my_topics'); ?>">
-                        <span class="icon">📌</span> My Topics
+                        <span class="icon">📌</span> My Forum
                     </a>
                 </li>
             <?php endif; ?>
