@@ -336,12 +336,6 @@ class Forum extends CI_Controller
             return;
         }
 
-        // ❌ blok admin masuk halaman My Topic
-        if ($this->session->userdata('role') !== 'user') {
-            redirect('forum'); // atau dashboard admin
-            return;
-        }
-
         $identities = array_filter([
             $this->session->userdata('name'),
             $this->session->userdata('username')
@@ -468,9 +462,9 @@ class Forum extends CI_Controller
         log_message('error', 'CREATOR: ' . $creator);
         log_message('error', 'USER: ' . $user1 . ' / ' . $user2);
 
-        if (!$isAdmin && !$isOwner) {
+        if (!$isAdmin) {
             return $this->output->set_status_header(403)
-                ->set_output(json_encode(['error' => 'Tidak punya akses']));
+                ->set_output(json_encode(['error' => 'Hanya admin yang bisa menghapus topik']));
         }
 
         $deleted = $this->forum_model->delete_topic($id);

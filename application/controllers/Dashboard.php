@@ -55,7 +55,32 @@ class Dashboard extends CI_Controller
                     'message' => mb_substr($description, 0, 200)
                 ];
             }
-            $data['recent_activity'] = $recent_activity;
+
+            // Juga ambil aktivitas pesan forum (seperti di halaman profile)
+            $username = $this->session->userdata('username');
+            $fullname = $this->session->userdata('name');
+            $forum_acts_1 = $this->forum_model->get_recent_activity_by_user($fullname, 10);
+            $forum_acts_2 = ($fullname && $fullname !== $username)
+                ? $this->forum_model->get_recent_activity_by_user($username, 10)
+                : [];
+
+            foreach (array_merge($forum_acts_1, $forum_acts_2) as $fa) {
+                $recent_activity[] = [
+                    'action' => 'KIRIM_PESAN',
+                    'avatar' => $fa['avatar'] ?? 'https://ui-avatars.com/api/?name=' . rawurlencode($fa['created_by'] ?? 'User'),
+                    'created_by' => $fa['created_by'] ?? 'User',
+                    'topic_id' => $fa['topic_id'] ?? '',
+                    'topic_title' => $fa['topic_title'] ?? '',
+                    'created_at' => $fa['created_at'] ?? 0,
+                    'message' => mb_substr($fa['message'] ?? '', 0, 200)
+                ];
+            }
+
+            // Urutkan semua aktivitas berdasarkan waktu terbaru & limit 10
+            usort($recent_activity, function ($a, $b) {
+                return ($b['created_at'] ?? 0) - ($a['created_at'] ?? 0);
+            });
+            $data['recent_activity'] = array_slice($recent_activity, 0, 10);
         } else {
             $data['recent_activity'] = [];
         }

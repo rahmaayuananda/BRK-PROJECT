@@ -303,7 +303,7 @@
             ? ($this->session->userdata('name') ? $this->session->userdata('name') : $this->session->userdata('username'))
             : '';
         $this->load->view('layout/header', [
-            'page_title' => 'Dashboard',
+            'page_title' => 'Forum Diskusi TSI',
             'subtitle' => 'Selamat Datang, ' . ($fullnameHeader ?: ''),
             'show_search' => false,
             'show_sort' => false,
@@ -351,7 +351,7 @@
                         <div class="section-title">🆕 Forum Terbaru</div>
 
                         <?php if (!empty($latest_topics)): ?>
-                            <?php foreach ($latest_topics as $t): ?>
+                            <?php foreach (array_slice($latest_topics, 0, 5) as $t): ?>
                                 <div class="list-item">
                                     <a
                                         href="<?php echo site_url('forum/topic/' . $t['id']) . '?from=dashboard&return=' . urlencode(site_url('dashboard')); ?>">
@@ -374,13 +374,20 @@
                         <div class="section-title">🔥 Forum Populer</div>
 
                         <?php if (!empty($popular_topics)): ?>
-                            <?php foreach ($popular_topics as $t): ?>
-                                <div class="list-item" style="display:flex;justify-content:space-between;">
+                            <?php foreach (array_slice($popular_topics, 0, 5) as $t): ?>
+                                <div class="list-item">
                                     <a
                                         href="<?php echo site_url('forum/topic/' . $t['id']) . '?from=dashboard&return=' . urlencode(site_url('dashboard')); ?>">
                                         <?php echo htmlentities($t['title'] ?? ''); ?>
                                     </a>
-                                    <span class="meta"><?php echo intval($t['messages_count']); ?> pesan</span>
+                                    <div class="meta" style="display:flex; justify-content:space-between; align-items:center;">
+                                        <span>
+                                            <?php echo htmlentities($t['created_by'] ?? 'Unknown'); ?> •
+                                            <span class="item-ts"
+                                                data-ts="<?php echo intval($t['created_at']); ?>"><?php echo date('d/m/Y h:i A', $t['created_at']); ?></span>
+                                        </span>
+                                        <span style="white-space:nowrap; margin-left:12px;">💬 <?php echo intval($t['messages_count']); ?> pesan</span>
+                                    </div>
                                 </div>
                             <?php endforeach; ?>
                         <?php else: ?>
@@ -396,7 +403,7 @@
 
                     <?php if (!empty($recent_activity)): ?>
                         <div class="activity-list">
-                            <?php foreach ($recent_activity as $act): 
+                            <?php foreach (array_slice($recent_activity, 0, 10) as $act): 
                                 // Convert action to readable format
                                 $action_label = str_replace('_', ' ', $act['action'] ?? 'ACTIVITY');
                                 $action_label = ucwords(strtolower($action_label));
@@ -417,7 +424,15 @@
                                     </div>
                                     
                                     <div class="activity-card-description">
-                                        <?php echo htmlentities($act['message'] ?? ''); ?>
+                                        <?php if (!empty($act['topic_title'])): ?>
+                                            <span style="color:#64748b;">di topik</span>
+                                            <a href="<?php echo site_url('forum/topic/' . $act['topic_id']) . '?from=dashboard&return=' . urlencode(site_url('dashboard')); ?>" style="color:var(--accent); text-decoration:none; font-weight:600;"><?php echo htmlentities($act['topic_title']); ?></a>
+                                            <?php if (!empty($act['message'])): ?>
+                                                <br><span style="color:#475569;"><?php echo htmlentities($act['message']); ?></span>
+                                            <?php endif; ?>
+                                        <?php else: ?>
+                                            <?php echo htmlentities($act['message'] ?? ''); ?>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             <?php endforeach; ?>

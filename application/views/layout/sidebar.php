@@ -67,13 +67,11 @@ else {
                 </a>
             </li>
 
-            <?php if ($this->session->userdata('role') === 'user'): ?>
-                <li class="<?= $my_active ?>">
-                    <a href="<?= site_url('forum/my_topics'); ?>">
-                        <span class="icon">📌</span> My Forum
-                    </a>
-                </li>
-            <?php endif; ?>
+            <li class="<?= $my_active ?>">
+                <a href="<?= site_url('forum/my_topics'); ?>">
+                    <span class="icon">📌</span> My Forum
+                </a>
+            </li>
 
             <li class="<?= $arsip_active ?? '' ?>">
                 <a href="<?= site_url('forum/arsip'); ?>">

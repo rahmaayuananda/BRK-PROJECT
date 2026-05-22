@@ -318,6 +318,68 @@
             margin: 0 auto;
             /* center seluruh layout */
         }
+
+        /* Pagination */
+        .pagination-bar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+            padding: 12px 0;
+        }
+
+        .pagination-buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .pagination-buttons button {
+            min-width: 36px;
+            height: 36px;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 10px;
+        }
+
+        .pagination-buttons button:hover:not(:disabled) {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.25);
+        }
+
+        .pagination-buttons button.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.25);
+        }
+
+        .pagination-buttons button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .pagination-info {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 500;
+            margin-top: 4px;
+        }
     </style>
 </head>
 
@@ -339,7 +401,7 @@
                     $current_fullname = $this->session->userdata('name') ?? $this->session->userdata('fullname') ?? '';
                     ?>
                     <?php if (!empty($topics) && is_array($topics)): ?>
-                        <?php foreach ($topics as $t): ?>
+                        <?php foreach (array_slice($topics, 0, 10) as $t): ?>
                             <div class="topic-card"
                                 data-href="<?php echo site_url('forum/topic/' . $t['id']) . '?from=my_topics&return=' . urlencode(current_url()); ?>">
                                 <div class="avatar"><?php echo strtoupper(mb_substr($t['title'], 0, 1, 'UTF-8')); ?></div>
@@ -370,7 +432,7 @@
                                             Buka
                                         </a>
                                     </div> -->
-                                    <?php if (isset($t['created_by']) && ($t['created_by'] == $current_nip || $t['created_by'] == $current_username || $t['created_by'] == $current_id || $t['created_by'] == $current_fullname)): ?>
+                                    <?php if ($this->session->userdata('role') === 'admin'): ?>
                                         <div style="margin-top:6px">
                                             <button class="topic-action btn danger delete-btn"
                                                 onclick="openDeleteModal('<?php echo $t['id']; ?>', <?php echo json_encode($t['title'] ?? ''); ?>)">
@@ -385,6 +447,7 @@
                         <div style="padding:20px;color:#6b7280">Anda belum bergabung ke topik manapun.</div>
                     <?php endif; ?>
                 </div>
+                <div id="paginationBar" class="pagination-bar"></div>
             </section>
         </main>
     </div>
@@ -403,11 +466,16 @@
             </div>
         </div>
     </div>
-
     <script>
         // Load and render user's joined topics, provide search/sort, realtime + notifications, and modals
         (function () {
-            async function refreshTopics() {
+            // Pagination state
+            const ITEMS_PER_PAGE = 10;
+            let currentPage = 1;
+            let totalFilteredItems = 0;
+
+            async function refreshTopics(resetPage) {
+                if (resetPage) currentPage = 1;
                 try {
                     const res = await fetch('<?php echo site_url('forum/user_topics'); ?>');
                     let data = await res.json();
@@ -418,9 +486,27 @@
 
                     const cont = document.querySelector('.topic-list');
                     const search = document.getElementById('searchInput').value.trim().toLowerCase();
+
+                    // Filter by search
+                    let filtered = data;
+                    if (search) {
+                        filtered = data.filter(t => String(t.title || '').toLowerCase().indexOf(search) !== -1);
+                    }
+
+                    totalFilteredItems = filtered.length;
+                    const totalPages = Math.max(1, Math.ceil(totalFilteredItems / ITEMS_PER_PAGE));
+                    if (currentPage > totalPages) currentPage = totalPages;
+
+                    // Slice for current page
+                    const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
+                    const pageData = filtered.slice(startIdx, startIdx + ITEMS_PER_PAGE);
+
                     cont.innerHTML = '';
-                    for (const t of data) {
-                        if (search && String(t.title || '').toLowerCase().indexOf(search) === -1) continue;
+                    if (pageData.length === 0) {
+                        cont.innerHTML = '<div style="padding:20px;color:#6b7280">Tidak ada topik yang ditemukan.</div>';
+                    }
+
+                    for (const t of pageData) {
                         const card = document.createElement('div'); card.className = 'topic-card'; card.tabIndex = 0;
                         card.setAttribute('data-id', t.id); card.setAttribute('data-title', (t.title || '').toLowerCase());
 
@@ -461,8 +547,8 @@
                         const stat = document.createElement('div'); stat.className = 'stat'; const total = t.total_messages ? t.total_messages : 0; stat.innerHTML = `<svg viewBox="0 0 24 24" fill="none"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"stroke="#6b7280" stroke-width="1.2"/></svg><span>${total}</span>`;
                         stats.appendChild(stat);
 
-                        const currentUsername = <?php echo json_encode($this->session->userdata('username') ?? $this->session->userdata('id_users') ?? ''); ?>;
-                        if (t.created_by === currentUsername) {
+                        const role = <?php echo json_encode($this->session->userdata('role') ?? ''); ?>;
+                        if (role === 'admin') {
                             const delWrap = document.createElement('div');
                             delWrap.style.marginTop = '6px';
                             const delBtn = document.createElement('button');
@@ -483,17 +569,107 @@
                         card.addEventListener('click', function (e) { if (e.target.closest('a') || e.target.closest('button')) return; var href = this.getAttribute('data-href'); if (href) window.location.href = href; });
                         card.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); var href = this.getAttribute('data-href'); if (href) window.location.href = href; } });
                         card.style.cursor = 'pointer';
-
                     }
+
+                    // Render pagination
+                    renderPagination(totalPages);
                 } catch (e) { console.error(e); }
             }
 
-            document.getElementById('searchInput').addEventListener('input', function () { refreshTopics(); });
-            document.getElementById('sortSelect').addEventListener('change', function () { refreshTopics(); });
+            function renderPagination(totalPages) {
+                const bar = document.getElementById('paginationBar');
+                if (!bar) return;
+                bar.innerHTML = '';
+
+                if (totalPages <= 1) return; // No pagination needed
+
+                const btnContainer = document.createElement('div');
+                btnContainer.className = 'pagination-buttons';
+
+                // Previous
+                const prevBtn = document.createElement('button');
+                prevBtn.innerHTML = '‹ Prev';
+                prevBtn.disabled = currentPage <= 1;
+                prevBtn.addEventListener('click', function () { if (currentPage > 1) { currentPage--; refreshTopics(); scrollToTop(); } });
+                btnContainer.appendChild(prevBtn);
+
+                // Pages
+                const maxVisible = 5;
+                let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+                let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+                if (endPage - startPage < maxVisible - 1) {
+                    startPage = Math.max(1, endPage - maxVisible + 1);
+                }
+
+                if (startPage > 1) {
+                    const firstBtn = document.createElement('button');
+                    firstBtn.textContent = '1';
+                    firstBtn.addEventListener('click', function () { currentPage = 1; refreshTopics(); scrollToTop(); });
+                    btnContainer.appendChild(firstBtn);
+                    if (startPage > 2) {
+                        const dots = document.createElement('button');
+                        dots.textContent = '...';
+                        dots.disabled = true;
+                        dots.style.border = 'none';
+                        dots.style.background = 'none';
+                        btnContainer.appendChild(dots);
+                    }
+                }
+
+                for (let i = startPage; i <= endPage; i++) {
+                    const btn = document.createElement('button');
+                    btn.textContent = i;
+                    if (i === currentPage) btn.classList.add('active');
+                    btn.addEventListener('click', (function (page) {
+                        return function () { currentPage = page; refreshTopics(); scrollToTop(); };
+                    })(i));
+                    btnContainer.appendChild(btn);
+                }
+
+                if (endPage < totalPages) {
+                    if (endPage < totalPages - 1) {
+                        const dots = document.createElement('button');
+                        dots.textContent = '...';
+                        dots.disabled = true;
+                        dots.style.border = 'none';
+                        dots.style.background = 'none';
+                        btnContainer.appendChild(dots);
+                    }
+                    const lastBtn = document.createElement('button');
+                    lastBtn.textContent = totalPages;
+                    lastBtn.addEventListener('click', function () { currentPage = totalPages; refreshTopics(); scrollToTop(); });
+                    btnContainer.appendChild(lastBtn);
+                }
+
+                // Next
+                const nextBtn = document.createElement('button');
+                nextBtn.innerHTML = 'Next ›';
+                nextBtn.disabled = currentPage >= totalPages;
+                nextBtn.addEventListener('click', function () { if (currentPage < totalPages) { currentPage++; refreshTopics(); scrollToTop(); } });
+                btnContainer.appendChild(nextBtn);
+
+                bar.appendChild(btnContainer);
+
+                // Info text
+                const info = document.createElement('div');
+                info.className = 'pagination-info';
+                const startItem = (currentPage - 1) * ITEMS_PER_PAGE + 1;
+                const endItem = Math.min(currentPage * ITEMS_PER_PAGE, totalFilteredItems);
+                info.textContent = startItem + '-' + endItem + ' dari ' + totalFilteredItems + ' topik';
+                bar.appendChild(info);
+            }
+
+            function scrollToTop() {
+                const content = document.querySelector('.content');
+                if (content) content.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            document.getElementById('searchInput').addEventListener('input', function () { refreshTopics(true); });
+            document.getElementById('sortSelect').addEventListener('change', function () { refreshTopics(true); });
             var _nd = document.getElementById('newDiscussion'); if (_nd) { _nd.addEventListener('click', function () { openNewDiscussionModal(); }); }
 
             // Polling fallback for topic list
-            // setInterval(refreshTopics, 4000);
+            // setInterval(function() { refreshTopics(); }, 4000);
             // initial load
             refreshTopics();
 

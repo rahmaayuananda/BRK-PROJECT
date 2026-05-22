@@ -202,6 +202,68 @@
             background: #cbd5e1;
             border-radius: 8px;
         }
+
+        /* Pagination */
+        .pagination-bar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+            padding: 12px 0;
+        }
+
+        .pagination-buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .pagination-buttons button {
+            min-width: 36px;
+            height: 36px;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 10px;
+        }
+
+        .pagination-buttons button:hover:not(:disabled) {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.25);
+        }
+
+        .pagination-buttons button.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.25);
+        }
+
+        .pagination-buttons button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .pagination-info {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 500;
+            margin-top: 4px;
+        }
     </style>
 </head>
 
@@ -256,6 +318,7 @@
                     <?php endif; ?>
 
                 </div>
+                <div id="paginationBar" class="pagination-bar"></div>
             </section>
         </main>
     </div>
@@ -294,16 +357,135 @@
         });
 
         cards.forEach(card => container.appendChild(card));
+        refreshPagination(true);
     });
 
     document.getElementById('searchInput')?.addEventListener('input', function () {
-        const query = this.value.toLowerCase();
-        document.querySelectorAll('.topic-card').forEach(card => {
-            const title = card.querySelector('.topic-title').textContent.toLowerCase();
-            if (title.includes(query)) card.style.display = '';
-            else card.style.display = 'none';
-        });
+        refreshPagination(true);
     });
+
+    // Pagination state
+    const ITEMS_PER_PAGE = 10;
+    let currentPage = 1;
+
+    function refreshPagination(resetPage) {
+        if (resetPage) currentPage = 1;
+        const container = document.querySelector('.topic-list');
+        if (!container) return;
+
+        const query = document.getElementById('searchInput')?.value.toLowerCase() || '';
+        const cards = Array.from(container.querySelectorAll('.topic-card'));
+
+        // Hide all first
+        cards.forEach(card => card.style.display = 'none');
+
+        // Filter cards matching query
+        const visibleCards = cards.filter(card => {
+            const title = card.querySelector('.topic-title').textContent.toLowerCase();
+            return title.includes(query);
+        });
+
+        const totalFilteredItems = visibleCards.length;
+        const totalPages = Math.max(1, Math.ceil(totalFilteredItems / ITEMS_PER_PAGE));
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
+        const pageCards = visibleCards.slice(startIdx, startIdx + ITEMS_PER_PAGE);
+        pageCards.forEach(card => card.style.display = '');
+
+        renderPaginationControls(totalPages, totalFilteredItems);
+    }
+
+    function renderPaginationControls(totalPages, totalFilteredItems) {
+        const bar = document.getElementById('paginationBar');
+        if (!bar) return;
+        bar.innerHTML = '';
+
+        if (totalPages <= 1) return;
+
+        const btnContainer = document.createElement('div');
+        btnContainer.className = 'pagination-buttons';
+
+        // Prev
+        const prevBtn = document.createElement('button');
+        prevBtn.innerHTML = '‹ Prev';
+        prevBtn.disabled = currentPage <= 1;
+        prevBtn.addEventListener('click', function () { if (currentPage > 1) { currentPage--; refreshPagination(); scrollToTop(); } });
+        btnContainer.appendChild(prevBtn);
+
+        // Pages
+        const maxVisible = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+        if (endPage - startPage < maxVisible - 1) {
+            startPage = Math.max(1, endPage - maxVisible + 1);
+        }
+
+        if (startPage > 1) {
+            const firstBtn = document.createElement('button');
+            firstBtn.textContent = '1';
+            firstBtn.addEventListener('click', function () { currentPage = 1; refreshPagination(); scrollToTop(); });
+            btnContainer.appendChild(firstBtn);
+            if (startPage > 2) {
+                const dots = document.createElement('button');
+                dots.textContent = '...';
+                dots.disabled = true;
+                dots.style.border = 'none';
+                dots.style.background = 'none';
+                btnContainer.appendChild(dots);
+            }
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            const btn = document.createElement('button');
+            btn.textContent = i;
+            if (i === currentPage) btn.classList.add('active');
+            btn.addEventListener('click', (function (page) {
+                return function () { currentPage = page; refreshPagination(); scrollToTop(); };
+            })(i));
+            btnContainer.appendChild(btn);
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                const dots = document.createElement('button');
+                dots.textContent = '...';
+                dots.disabled = true;
+                dots.style.border = 'none';
+                dots.style.background = 'none';
+                btnContainer.appendChild(dots);
+            }
+            const lastBtn = document.createElement('button');
+            lastBtn.textContent = totalPages;
+            lastBtn.addEventListener('click', function () { currentPage = totalPages; refreshPagination(); scrollToTop(); });
+            btnContainer.appendChild(lastBtn);
+        }
+
+        // Next
+        const nextBtn = document.createElement('button');
+        nextBtn.innerHTML = 'Next ›';
+        nextBtn.disabled = currentPage >= totalPages;
+        nextBtn.addEventListener('click', function () { if (currentPage < totalPages) { currentPage++; refreshPagination(); scrollToTop(); } });
+        btnContainer.appendChild(nextBtn);
+
+        bar.appendChild(btnContainer);
+
+        // Info text
+        const info = document.createElement('div');
+        info.className = 'pagination-info';
+        const startItem = (currentPage - 1) * ITEMS_PER_PAGE + 1;
+        const endItem = Math.min(currentPage * ITEMS_PER_PAGE, totalFilteredItems);
+        info.textContent = startItem + '-' + endItem + ' dari ' + totalFilteredItems + ' topik';
+        bar.appendChild(info);
+    }
+
+    function scrollToTop() {
+        const content = document.querySelector('.content');
+        if (content) content.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Initial load
+    refreshPagination();
 
     // show a global inline alert
     function showGlobalAlert(msg, type) {
