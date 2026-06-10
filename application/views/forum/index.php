@@ -454,11 +454,11 @@
         style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;padding:20px;z-index:9999">
         <div class="modal-box"
             style="background:white;border-radius:10px;max-width:560px;width:100%;padding:18px;box-shadow:0 10px 30px rgba(2,6,23,0.2);">
-            <h3>Buat Topik Baru</h3>
+            <h3>Buat Forum Baru</h3>
             <div id="newTopicMsg" class="modal-msg" style="margin-bottom:10px;color:#6b7280"></div>
             <div style="margin-bottom:12px">
-                <label for="newTopicTitle">Judul Topik</label>
-                <input id="newTopicTitle" type="text" placeholder="Judul topik..."
+                <label for="newTopicTitle">Judul Forum</label>
+                <input id="newTopicTitle" type="text" placeholder="Judul Forum..."
                     style="width:100%;padding:10px;border-radius:6px;border:1px solid #e6e9ee">
             </div>
             <div class="actions" style="display:flex;gap:10px;justify-content:flex-end">
